@@ -7,11 +7,10 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/alrusov/bufpool"
-
-	"github.com/alrusov/misc"
-
 	"github.com/naoina/toml"
+
+	"github.com/alrusov/bufpool"
+	"github.com/alrusov/misc"
 )
 
 //----------------------------------------------------------------------------------------------------------------------------//
