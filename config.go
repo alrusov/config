@@ -1,7 +1,15 @@
 package config
 
 import (
+	"bytes"
+	"fmt"
 	"os"
+	"regexp"
+	"strings"
+
+	"github.com/alrusov/bufpool"
+
+	"github.com/alrusov/misc"
 
 	"github.com/naoina/toml"
 )
@@ -50,17 +58,109 @@ const (
 	ClientDefaultTimeout = 5
 )
 
+var (
+	configText = []byte{}
+)
+
+//----------------------------------------------------------------------------------------------------------------------------//
+
+func populate(data []byte) (*bytes.Buffer, error) {
+	var msgs []string
+
+	osEnv := os.Environ()
+	env := make(map[string][]byte, len(osEnv))
+	for _, s := range osEnv {
+		df := strings.SplitN(s, "=", 2)
+		v := ""
+		if len(df) > 1 {
+			v = df[1]
+		}
+		env[df[0]] = []byte(v)
+	}
+
+	re, err := regexp.Compile(`(?:\{\$)([[:alnum:]_]+)(?:\})`)
+	if err != nil {
+		return nil, err
+	}
+
+	newData := bufpool.GetBuf()
+	list := bytes.Split(data, []byte("\n"))
+	n := 0
+
+	for _, line := range list {
+		n++
+		line = bytes.TrimSpace(line)
+		findResult := re.FindAllSubmatch(line, -1)
+		if findResult != nil {
+			for _, matches := range findResult {
+				name := string(matches[1])
+				v, exists := env[name]
+				if !exists {
+					msgs = append(msgs, fmt.Sprintf(`Undefined environment variable "%s" in line %d`, name, n))
+				}
+				line = bytes.Replace(line, []byte("{$"+name+"}"), v, -1)
+			}
+		}
+		newData.Write(line)
+		newData.WriteByte(byte('\n'))
+	}
+
+	if len(msgs) != 0 {
+		bufpool.PutBuf(newData)
+		return nil, misc.JoinedError(msgs)
+	}
+
+	return newData, nil
+}
+
 //----------------------------------------------------------------------------------------------------------------------------//
 
 // LoadFile parses the specified file into a Config object
-func LoadFile(filename string, cfg interface{}) (err error) {
-	f, err := os.Open(filename)
+func LoadFile(fileName string, cfg interface{}) error {
+	f, err := os.Open(fileName)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
 
-	return toml.NewDecoder(f).Decode(cfg)
+	stat, err := f.Stat()
+	if err != nil {
+		return err
+	}
+	size := stat.Size()
+
+	data := make([]byte, size)
+	n, err := f.Read(data)
+	if err != nil {
+		return err
+	}
+	if int64(n) != size {
+		return fmt.Errorf(`File "%s" was not fully read - expect %d, read %d`, fileName, size, n)
+	}
+
+	newData, err := populate(data)
+	if err != nil {
+		return err
+	}
+	defer bufpool.PutBuf(newData)
+
+	data = newData.Bytes()
+	configText = make([]byte, len(data))
+	copy(configText, data)
+
+	err = toml.Unmarshal(newData.Bytes(), cfg)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+//----------------------------------------------------------------------------------------------------------------------------//
+
+// GetText -- get prepared configuration text
+func GetText() []byte {
+	return configText
 }
 
 //----------------------------------------------------------------------------------------------------------------------------//
