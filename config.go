@@ -63,6 +63,10 @@ var (
 
 //----------------------------------------------------------------------------------------------------------------------------//
 
+var (
+	re = regexp.MustCompile(`(?:\{\$)([[:alnum:]_]+)(?:\})`)
+)
+
 func populate(data []byte) (*bytes.Buffer, error) {
 	var msgs []string
 
@@ -75,11 +79,6 @@ func populate(data []byte) (*bytes.Buffer, error) {
 			v = df[1]
 		}
 		env[df[0]] = []byte(v)
-	}
-
-	re, err := regexp.Compile(`(?:\{\$)([[:alnum:]_]+)(?:\})`)
-	if err != nil {
-		return nil, err
 	}
 
 	newData := bufpool.GetBuf()
