@@ -136,6 +136,9 @@ func LoadFile(fileName string, cfg interface{}) error {
 		return fmt.Errorf(`File "%s" was not fully read - expect %d, read %d`, fileName, size, n)
 	}
 
+	re := regexp.MustCompile(`(?m)[[:space:]]*\\\r?\n[[:space:]]*`)
+	data = re.ReplaceAll(data, []byte(" "))
+
 	newData, err := populate(data)
 	if err != nil {
 		return err
