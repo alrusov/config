@@ -69,7 +69,7 @@ var (
 //----------------------------------------------------------------------------------------------------------------------------//
 
 var (
-	rePreprocessor = regexp.MustCompile(`(?:\{)([\$#])(.+)(?:\})`)
+	rePreprocessor = regexp.MustCompile(`(?:\{)([\$#])([^\}]+)(?:\})`)
 	reMultiLine    = regexp.MustCompile(`(?m)[[:space:]]*\\\r?\n[[:space:]]*`)
 )
 
