@@ -1,0 +1,11 @@
+param-3 = "!@#$%^&@ \
+	qwertyuiop \
+	asdfghjkl\
+	123456789         \
+	ZZZ"
+
+param-4 = 123456
+param-5 = {                              \
+    "field1"        = "val1",            \
+    "field2"        = 777,              \
+}

@@ -63,18 +63,53 @@ const (
 
 var (
 	configText = []byte{}
+	fEnv       = os.Environ
 )
 
 //----------------------------------------------------------------------------------------------------------------------------//
 
 var (
-	re = regexp.MustCompile(`(?:\{\$)([[:alnum:]_]+)(?:\})`)
+	rePreprocessor = regexp.MustCompile(`(?:\{)([\$#])(.+)(?:\})`)
+	reMultiLine    = regexp.MustCompile(`(?m)[[:space:]]*\\\r?\n[[:space:]]*`)
 )
+
+//----------------------------------------------------------------------------------------------------------------------------//
+
+func readFile(name string) ([]byte, error) {
+	f, err := os.Open(name)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	fi, err := f.Stat()
+	if err != nil {
+		return nil, err
+	}
+
+	fSize := fi.Size()
+	data := make([]byte, fSize)
+	rSize, err := f.Read(data)
+	if err != nil {
+		return nil, err
+	}
+	if rSize != rSize {
+		return nil, fmt.Errorf("File read error - got %d bytes, expected %d", rSize, fSize)
+	}
+
+	data = reMultiLine.ReplaceAll(data, []byte(" "))
+
+	return data, nil
+}
+
+//----------------------------------------------------------------------------------------------------------------------------//
 
 func populate(data []byte) (*bytes.Buffer, error) {
 	var msgs []string
 
-	osEnv := os.Environ()
+	data = bytes.TrimSpace(reMultiLine.ReplaceAll(data, []byte(" ")))
+
+	osEnv := fEnv()
 	env := make(map[string][]byte, len(osEnv))
 	for _, s := range osEnv {
 		df := strings.SplitN(s, "=", 2)
@@ -92,19 +127,59 @@ func populate(data []byte) (*bytes.Buffer, error) {
 	for _, line := range list {
 		n++
 		line = bytes.TrimSpace(line)
-		findResult := re.FindAllSubmatch(line, -1)
+		if len(line) == 0 {
+			continue
+		}
+		if line[0] == '#' {
+			continue
+		}
+
+		findResult := rePreprocessor.FindAllSubmatch(line, -1)
 		if findResult != nil {
 			for _, matches := range findResult {
-				name := string(matches[1])
-				v, exists := env[name]
-				if !exists {
-					msgs = append(msgs, fmt.Sprintf(`Undefined environment variable "%s" in line %d`, name, n))
+				switch string(matches[1]) {
+				case "$":
+					name := string(matches[2])
+					v, exists := env[name]
+					if !exists {
+						msgs = append(msgs, fmt.Sprintf(`Undefined environment variable "%s" in line %d`, name, n))
+						continue
+					}
+					line = bytes.Replace(line, []byte("{$"+name+"}"), v, -1)
+				case "#":
+					s := string(matches[2])
+					if strings.HasPrefix(s, "include ") {
+						p := strings.Split(s, " ")
+						if len(p) != 2 {
+							msgs = append(msgs, fmt.Sprintf(`Illegal preprocessor command "%s" in line %d`, string(matches[2]), n))
+							continue
+						}
+						var err error
+						line, err = readFile(p[1])
+						if err != nil {
+							msgs = append(msgs, fmt.Sprintf(`Include error "%s" in line %d`, err.Error(), n))
+							continue
+						}
+
+						b, err := populate(line)
+						if err != nil {
+							msgs = append(msgs, fmt.Sprintf(`Include error "%s" in line %d`, err.Error(), n))
+							continue
+						}
+
+						line = b.Bytes()
+						continue
+					}
+
+					msgs = append(msgs, fmt.Sprintf(`Unknown preprocessor command "%s" in line %d`, string(matches[2]), n))
 				}
-				line = bytes.Replace(line, []byte("{$"+name+"}"), v, -1)
 			}
 		}
-		newData.Write(line)
-		newData.WriteByte(byte('\n'))
+
+		if len(line) != 0 {
+			newData.Write(bytes.TrimSpace(line))
+			newData.WriteByte(byte('\n'))
+		}
 	}
 
 	if len(msgs) != 0 {
@@ -139,9 +214,6 @@ func LoadFile(fileName string, cfg interface{}) error {
 	if int64(n) != size {
 		return fmt.Errorf(`File "%s" was not fully read - expect %d, read %d`, fileName, size, n)
 	}
-
-	re := regexp.MustCompile(`(?m)[[:space:]]*\\\r?\n[[:space:]]*`)
-	data = re.ReplaceAll(data, []byte(" "))
 
 	newData, err := populate(data)
 	if err != nil {
