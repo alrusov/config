@@ -3,6 +3,8 @@ package config
 import (
 	"encoding/json"
 	"testing"
+
+	"github.com/alrusov/misc"
 )
 
 //----------------------------------------------------------------------------------------------------------------------------//
@@ -21,13 +23,13 @@ func TestPopulate(t *testing.T) {
 	}
 
 	type cfg struct {
-		P0    string                 `toml:"param-0"`
-		P1    string                 `toml:"param-1"`
-		P2    int                    `toml:"param-2"`
-		P3    string                 `toml:"param-3"`
-		P4    int                    `toml:"param-4"`
-		P5    map[string]interface{} `toml:"param-5"`
-		Plast s1                     `toml:"param-last"`
+		P0    string            `toml:"param-0"`
+		P1    string            `toml:"param-1"`
+		P2    int               `toml:"param-2"`
+		P3    string            `toml:"param-3"`
+		P4    int               `toml:"param-4"`
+		P5    misc.InterfaceMap `toml:"param-5"`
+		Plast s1                `toml:"param-last"`
 	}
 
 	expected := cfg{
@@ -36,7 +38,7 @@ func TestPopulate(t *testing.T) {
 		P2: 666,
 		P3: `!@#$%^&@ qwertyuiop asdfghjkl 123456789 ZZZ`,
 		P4: 123456,
-		P5: map[string]interface{}{
+		P5: misc.InterfaceMap{
 			"field1": "val1",
 			"field2": 777,
 		},

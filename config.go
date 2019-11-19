@@ -166,6 +166,7 @@ func populate(data []byte) (*bytes.Buffer, error) {
 							msgs = append(msgs, fmt.Sprintf(`Include error "%s" in line %d`, err.Error(), n))
 							continue
 						}
+						defer bufpool.PutBuf(b)
 
 						line = b.Bytes()
 						continue
