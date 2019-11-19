@@ -89,15 +89,15 @@ func readFile(name string) ([]byte, error) {
 
 	fSize := fi.Size()
 	data := make([]byte, fSize)
-	rSize, err := f.Read(data)
+	dSize, err := f.Read(data)
 	if err != nil {
 		return nil, err
 	}
-	if rSize != rSize {
-		return nil, fmt.Errorf("File read error - got %d bytes, expected %d", rSize, fSize)
+	if int64(dSize) != fSize {
+		return nil, fmt.Errorf("File read error - got %d bytes, expected %d", dSize, fSize)
 	}
 
-	data = reMultiLine.ReplaceAll(data, []byte(" "))
+	data = bytes.TrimSpace(reMultiLine.ReplaceAll(data, []byte(" ")))
 
 	return data, nil
 }
@@ -106,8 +106,6 @@ func readFile(name string) ([]byte, error) {
 
 func populate(data []byte) (*bytes.Buffer, error) {
 	var msgs []string
-
-	data = bytes.TrimSpace(reMultiLine.ReplaceAll(data, []byte(" ")))
 
 	osEnv := fEnv()
 	env := make(map[string][]byte, len(osEnv))
@@ -154,6 +152,7 @@ func populate(data []byte) (*bytes.Buffer, error) {
 							msgs = append(msgs, fmt.Sprintf(`Illegal preprocessor command "%s" in line %d`, string(matches[2]), n))
 							continue
 						}
+						
 						var err error
 						line, err = readFile(p[1])
 						if err != nil {
@@ -195,25 +194,9 @@ func populate(data []byte) (*bytes.Buffer, error) {
 
 // LoadFile parses the specified file into a Config object
 func LoadFile(fileName string, cfg interface{}) error {
-	f, err := os.Open(fileName)
+	data, err := readFile(fileName)
 	if err != nil {
 		return err
-	}
-	defer f.Close()
-
-	stat, err := f.Stat()
-	if err != nil {
-		return err
-	}
-	size := stat.Size()
-
-	data := make([]byte, size)
-	n, err := f.Read(data)
-	if err != nil {
-		return err
-	}
-	if int64(n) != size {
-		return fmt.Errorf(`File "%s" was not fully read - expect %d, read %d`, fileName, size, n)
 	}
 
 	newData, err := populate(data)

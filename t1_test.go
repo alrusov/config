@@ -70,6 +70,8 @@ func TestPopulate(t *testing.T) {
 	if string(jLoaded) != string(jExpected) {
 		t.Errorf("Got: \n%s\nExpected\n%s", jLoaded, jExpected)
 	}
+
+	t.Logf("\nSource:\n%s\nResult:\n%s\n", string(GetText()), string(jLoaded))
 }
 
 //----------------------------------------------------------------------------------------------------------------------------//
