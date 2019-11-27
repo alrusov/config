@@ -27,8 +27,6 @@ type Common struct {
 	LogBufferSize  int    `toml:"log-buffer-size"`
 	LogBufferDelay int    `toml:"log-buffer-delay"`
 
-	ProfilerEnabled bool `toml:"profiler-enabled"`
-
 	GoMaxProcs int `toml:"go-max-procs"`
 
 	MemStatsPeriod int    `toml:"mem-stats-period"`
@@ -45,6 +43,8 @@ type Listener struct {
 
 	//
 	Timeout int `toml:"timeout"`
+
+	ProfilerEnabled bool `toml:"profiler-enabled"`
 }
 
 // DB --
