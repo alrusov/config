@@ -27,6 +27,8 @@ type Common struct {
 	LogBufferSize  int    `toml:"log-buffer-size"`
 	LogBufferDelay int    `toml:"log-buffer-delay"`
 
+	ProfilerEnabled bool `toml:"profiler-enabled"`
+
 	GoMaxProcs int `toml:"go-max-procs"`
 
 	MemStatsPeriod int    `toml:"mem-stats-period"`
@@ -152,7 +154,7 @@ func populate(data []byte) (*bytes.Buffer, error) {
 							msgs = append(msgs, fmt.Sprintf(`Illegal preprocessor command "%s" in line %d`, string(matches[2]), n))
 							continue
 						}
-						
+
 						var err error
 						line, err = readFile(p[1])
 						if err != nil {
