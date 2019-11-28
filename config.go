@@ -31,6 +31,9 @@ type Common struct {
 
 	MemStatsPeriod int    `toml:"mem-stats-period"`
 	MemStatsLevel  string `toml:"mem-stats-level"`
+
+	ProfilerEnabled bool `toml:"profiler-enabled"`
+	DeepProfiling   bool `toml:"deep-profiling"`
 }
 
 // Listener --
@@ -43,8 +46,6 @@ type Listener struct {
 
 	//
 	Timeout int `toml:"timeout"`
-
-	ProfilerEnabled bool `toml:"profiler-enabled"`
 }
 
 // DB --
@@ -64,8 +65,10 @@ const (
 )
 
 var (
-	configText = []byte{}
-	fEnv       = os.Environ
+	configText   = []byte{}
+	fullConfig   = interface{}(nil)
+	commonConfig = (*Common)(nil)
+	fEnv         = os.Environ
 )
 
 //----------------------------------------------------------------------------------------------------------------------------//
@@ -216,6 +219,23 @@ func LoadFile(fileName string, cfg interface{}) error {
 		return err
 	}
 
+	fullConfig = cfg
+
+	cp := reflect.ValueOf(cfg)
+	if cp.Kind() == reflect.Ptr {
+		c := cp.Elem()
+		if c.Kind() == reflect.Struct {
+			fCnt := c.NumField()
+			for i := 0; i < fCnt; i++ {
+				f, ok := c.Field(i).Addr().Interface().(*Common)
+				if ok {
+					commonConfig = f
+					break
+				}
+			}
+		}
+	}
+
 	return nil
 }
 
@@ -224,6 +244,20 @@ func LoadFile(fileName string, cfg interface{}) error {
 // GetText -- get prepared configuration text
 func GetText() []byte {
 	return configText
+}
+
+//----------------------------------------------------------------------------------------------------------------------------//
+
+// GetConfig --
+func GetConfig() interface{} {
+	return fullConfig
+}
+
+//----------------------------------------------------------------------------------------------------------------------------//
+
+// GetCommon --
+func GetCommon() *Common {
+	return commonConfig
 }
 
 //----------------------------------------------------------------------------------------------------------------------------//
