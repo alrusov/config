@@ -287,10 +287,10 @@ func Check(cfg interface{}, list []interface{}) error {
 			continue
 		}
 
-		if v.Elem().Kind() != reflect.Struct {
-			misc.AddMessage(&msgs, fmt.Sprintf(`"%#v" is not pointer to struct`, x))
-			continue
-		}
+		//if v.Elem().Kind() != reflect.Struct {
+		//	misc.AddMessage(&msgs, fmt.Sprintf(`"%#v" is not pointer to struct`, x))
+		//	continue
+		//}
 
 		m := v.MethodByName("Check")
 
