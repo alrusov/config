@@ -32,6 +32,8 @@ type Common struct {
 	MemStatsPeriod int    `toml:"mem-stats-period"`
 	MemStatsLevel  string `toml:"mem-stats-level"`
 
+	LoadAvgPeriod int `toml:"load-avg-period"`
+
 	ProfilerEnabled bool `toml:"profiler-enabled"`
 	DeepProfiling   bool `toml:"deep-profiling"`
 }
@@ -268,6 +270,10 @@ func (x *Common) Check(cfg interface{}) (err error) {
 
 	if x.Name == "" {
 		x.Name = misc.AppName()
+	}
+
+	if x.LoadAvgPeriod <= 0 {
+		x.LoadAvgPeriod = 60
 	}
 
 	return misc.JoinedError(msgs)
