@@ -36,6 +36,9 @@ type Common struct {
 
 	ProfilerEnabled bool `toml:"profiler-enabled"`
 	DeepProfiling   bool `toml:"deep-profiling"`
+
+	DisabledEndpointsSlice []string        `toml:"disabled-endpoints"`
+	DisabledEndpoints      map[string]bool `toml:"-"`
 }
 
 // Listener --
@@ -274,6 +277,12 @@ func (x *Common) Check(cfg interface{}) (err error) {
 
 	if x.LoadAvgPeriod <= 0 {
 		x.LoadAvgPeriod = 60
+	}
+
+	x.DisabledEndpoints = make(map[string]bool, len(x.DisabledEndpointsSlice))
+	for _, name := range x.DisabledEndpointsSlice {
+		name = misc.NormalizeSlashes(name)
+		x.DisabledEndpoints[name] = true
 	}
 
 	return misc.JoinedError(msgs)
