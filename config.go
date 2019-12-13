@@ -51,6 +51,8 @@ type Listener struct {
 
 	//
 	Timeout int `toml:"timeout"`
+
+	IconFile string `toml:"icon-file"`
 }
 
 // DB --
