@@ -20,6 +20,7 @@ import (
 type Common struct {
 	Name        string `toml:"name"`
 	Description string `toml:"description"`
+	Class       string `toml:"class"`
 
 	LogLocalTime   bool   `toml:"log-local-time"`
 	LogDir         string `toml:"log-dir"`
