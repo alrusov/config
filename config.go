@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"path/filepath"
 	"reflect"
 	"regexp"
 	"strings"
@@ -89,6 +90,15 @@ var (
 //----------------------------------------------------------------------------------------------------------------------------//
 
 func readFile(name string) ([]byte, error) {
+	if !filepath.IsAbs(name) {
+		name = misc.AppExecPath() + "/" + name
+	}
+
+	name, err := filepath.Abs(name)
+	if err != nil {
+		return nil, err
+	}
+
 	f, err := os.Open(name)
 	if err != nil {
 		return nil, err
