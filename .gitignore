@@ -4,6 +4,10 @@
 *.dll
 *.so
 *.dylib
+__debug_bin
+
+# vim swp file
+*.swp
 
 # Test binary, build with `go test -c`
 *.test
@@ -12,12 +16,9 @@
 *.out
 
 # custom
-
 _extra/
 logs/
-error_log/
 
 TODO
-debug
 
 *.dump
