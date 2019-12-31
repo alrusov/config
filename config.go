@@ -54,6 +54,9 @@ type Listener struct {
 	Timeout int `toml:"timeout"`
 
 	IconFile string `toml:"icon-file"`
+
+	BasicAuthEnabled bool           `toml:"basic-auth-enabled"`
+	Users            misc.StringMap `toml:"users"`
 }
 
 // DB --
