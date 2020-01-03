@@ -28,7 +28,23 @@ var (
 var (
 	rePreprocessor = regexp.MustCompile(`(?:\{)([\$#])([^\}]+)(?:\})`)
 	reMultiLine    = regexp.MustCompile(`(?m)[[:space:]]*\\\r?\n[[:space:]]*`)
+
+	env = make(map[string][]byte)
 )
+
+//----------------------------------------------------------------------------------------------------------------------------//
+
+func init() {
+	osEnv := fEnv()
+	for _, s := range osEnv {
+		df := strings.SplitN(s, "=", 2)
+		v := ""
+		if len(df) > 1 {
+			v = df[1]
+		}
+		env[df[0]] = []byte(v)
+	}
+}
 
 //----------------------------------------------------------------------------------------------------------------------------//
 
@@ -71,17 +87,6 @@ func readFile(name string) ([]byte, error) {
 
 func populate(data []byte) (*bytes.Buffer, error) {
 	var msgs []string
-
-	osEnv := fEnv()
-	env := make(map[string][]byte, len(osEnv))
-	for _, s := range osEnv {
-		df := strings.SplitN(s, "=", 2)
-		v := ""
-		if len(df) > 1 {
-			v = df[1]
-		}
-		env[df[0]] = []byte(v)
-	}
 
 	newData := bufpool.GetBuf()
 	list := bytes.Split(data, []byte("\n"))
@@ -158,11 +163,24 @@ func populate(data []byte) (*bytes.Buffer, error) {
 //----------------------------------------------------------------------------------------------------------------------------//
 
 // LoadFile parses the specified file into a Config object
-func LoadFile(fileName string, cfg interface{}) error {
+func LoadFile(fileName string, cfg interface{}) (err error) {
 	data, err := readFile(fileName)
 	if err != nil {
 		return err
 	}
+
+	defer func() {
+		if err != nil {
+			msg := new(bytes.Buffer)
+			msg.WriteString(err.Error() + "\n>>>\n")
+			lines := bytes.Split(data, []byte("\n"))
+			for i, line := range lines {
+				msg.WriteString(fmt.Sprintf("%04d | %s\n", i+1, bytes.TrimSpace(line)))
+			}
+			msg.WriteString("<<<")
+			err = fmt.Errorf(string(msg.Bytes()))
+		}
+	}()
 
 	newData, err := populate(data)
 	if err != nil {
@@ -176,14 +194,7 @@ func LoadFile(fileName string, cfg interface{}) error {
 
 	err = toml.Unmarshal(newData.Bytes(), cfg)
 	if err != nil {
-		msg := new(bytes.Buffer)
-		msg.WriteString(err.Error() + "\n>>>\n")
-		lines := bytes.Split(newData.Bytes(), []byte("\n"))
-		for i, line := range lines {
-			msg.WriteString(fmt.Sprintf("%04d | %s\n", i+1, bytes.TrimSpace(line)))
-		}
-		msg.WriteString("<<<")
-		return fmt.Errorf(string(msg.Bytes()))
+		return err
 	}
 
 	fullConfig = cfg
