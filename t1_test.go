@@ -49,7 +49,7 @@ func TestPopulate(t *testing.T) {
 	}
 
 	var loaded cfg
-	err := LoadFile("./test.toml", &loaded)
+	err := LoadFile("^test.toml", &loaded)
 	if err != nil {
 		t.Errorf(err.Error())
 		return

@@ -20,21 +20,17 @@ var (
 	configText   = []byte{}
 	fullConfig   = interface{}(nil)
 	commonConfig = (*Common)(nil)
-	fEnv         = os.Environ
-)
 
-//----------------------------------------------------------------------------------------------------------------------------//
-
-var (
 	rePreprocessor = regexp.MustCompile(`(?:\{)([\$#])([^\}]+)(?:\})`)
 	reMultiLine    = regexp.MustCompile(`(?m)[[:space:]]*\\\r?\n[[:space:]]*`)
 
-	env = make(map[string][]byte)
+	fEnv = os.Environ
+	env  = make(map[string][]byte)
 )
 
 //----------------------------------------------------------------------------------------------------------------------------//
 
-func init() {
+func loadEnv() {
 	osEnv := fEnv()
 	for _, s := range osEnv {
 		df := strings.SplitN(s, "=", 2)
@@ -164,6 +160,10 @@ func populate(data []byte) (*bytes.Buffer, error) {
 
 // LoadFile parses the specified file into a Config object
 func LoadFile(fileName string, cfg interface{}) (err error) {
+	if len(env) == 0 {
+		loadEnv()
+	}
+
 	data, err := readFile(fileName)
 	if err != nil {
 		return err

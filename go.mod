@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	github.com/alrusov/bufpool v0.1.0
-	github.com/alrusov/misc v0.1.0
+	github.com/alrusov/misc v0.1.3
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/naoina/go-stringutil v0.1.0 // indirect
 	github.com/naoina/toml v0.1.1

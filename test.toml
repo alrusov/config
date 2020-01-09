@@ -7,7 +7,7 @@ param-1= "{$ENV1}"
 
 param-2 = {$ENV2}
 
-{#include test_include.toml}
+{#include ^test_include.toml}
 
 
 param-last = { \
