@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"path/filepath"
 	"reflect"
 	"regexp"
 	"strings"
@@ -44,8 +45,8 @@ func loadEnv() {
 
 //----------------------------------------------------------------------------------------------------------------------------//
 
-func readFile(name string) ([]byte, error) {
-	name, err := misc.AbsPath(name)
+func readFile(name string, base string) ([]byte, error) {
+	name, err := misc.AbsPathEx(name, base)
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +82,7 @@ func readFile(name string) ([]byte, error) {
 
 //----------------------------------------------------------------------------------------------------------------------------//
 
-func populate(data []byte) (*bytes.Buffer, error) {
+func populate(data []byte, base string) (*bytes.Buffer, error) {
 	var msgs []string
 
 	newData := bufpool.GetBuf()
@@ -120,13 +121,13 @@ func populate(data []byte) (*bytes.Buffer, error) {
 						}
 
 						var err error
-						repl, err := readFile(p[1])
+						repl, err := readFile(p[1], base)
 						if err != nil {
 							msgs = append(msgs, fmt.Sprintf(`Include error "%s" in line %d`, err.Error(), n))
 							continue
 						}
 
-						b, err := populate(repl)
+						b, err := populate(repl, base)
 						if err != nil {
 							msgs = append(msgs, fmt.Sprintf(`Include error "%s" in line %d`, err.Error(), n))
 							continue
@@ -164,7 +165,7 @@ func LoadFile(fileName string, cfg interface{}) (err error) {
 		loadEnv()
 	}
 
-	data, err := readFile(fileName)
+	data, err := readFile(fileName, misc.AppWorkDir())
 	if err != nil {
 		return err
 	}
@@ -182,7 +183,7 @@ func LoadFile(fileName string, cfg interface{}) (err error) {
 		}
 	}()
 
-	newData, err := populate(data)
+	newData, err := populate(data, filepath.Dir(fileName))
 	if err != nil {
 		return err
 	}
