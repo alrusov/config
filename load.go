@@ -45,39 +45,39 @@ func loadEnv() {
 
 //----------------------------------------------------------------------------------------------------------------------------//
 
-func readFile(name string, base string) ([]byte, error) {
+func readFile(name string, base string) ([]byte, string, error) {
 	name, err := misc.AbsPathEx(name, base)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	f, err := os.Open(name)
 	if err != nil {
-		return nil, err
+		return nil, name, err
 	}
 	defer f.Close()
 
 	fi, err := f.Stat()
 	if err != nil {
-		return nil, err
+		return nil, name, err
 	}
 
 	fSize := fi.Size()
 	if fSize == 0 {
-		return nil, nil
+		return nil, name, nil
 	}
 
 	data := make([]byte, fSize)
 	dSize, err := f.Read(data)
 	if err != nil {
-		return nil, err
+		return nil, name, err
 	}
 	if int64(dSize) != fSize {
-		return nil, fmt.Errorf("File read error - got %d bytes, expected %d", dSize, fSize)
+		return nil, name, fmt.Errorf("File read error - got %d bytes, expected %d", dSize, fSize)
 	}
 
 	data = bytes.TrimSpace(reMultiLine.ReplaceAll(data, []byte(" ")))
-	return data, nil
+	return data, name, nil
 }
 
 //----------------------------------------------------------------------------------------------------------------------------//
@@ -121,13 +121,13 @@ func populate(data []byte, base string) (*bytes.Buffer, error) {
 						}
 
 						var err error
-						repl, err := readFile(p[1], base)
+						repl, fn, err := readFile(p[1], base)
 						if err != nil {
 							msgs = append(msgs, fmt.Sprintf(`Include error "%s" in line %d`, err.Error(), n))
 							continue
 						}
 
-						b, err := populate(repl, base)
+						b, err := populate(repl, filepath.Dir(fn))
 						if err != nil {
 							msgs = append(msgs, fmt.Sprintf(`Include error "%s" in line %d`, err.Error(), n))
 							continue
@@ -165,7 +165,7 @@ func LoadFile(fileName string, cfg interface{}) (err error) {
 		loadEnv()
 	}
 
-	data, err := readFile(fileName, misc.AppWorkDir())
+	data, fn, err := readFile(fileName, misc.AppWorkDir())
 	if err != nil {
 		return err
 	}
@@ -183,7 +183,7 @@ func LoadFile(fileName string, cfg interface{}) (err error) {
 		}
 	}()
 
-	newData, err := populate(data, filepath.Dir(fileName))
+	newData, err := populate(data, filepath.Dir(fn))
 	if err != nil {
 		return err
 	}
