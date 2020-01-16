@@ -179,7 +179,7 @@ func LoadFile(fileName string, cfg interface{}) (err error) {
 				msg.WriteString(fmt.Sprintf("%04d | %s\n", i+1, bytes.TrimSpace(line)))
 			}
 			msg.WriteString("<<<")
-			err = fmt.Errorf(string(msg.Bytes()))
+			err = fmt.Errorf("%s", string(msg.Bytes()))
 		}
 	}()
 
