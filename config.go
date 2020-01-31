@@ -33,7 +33,7 @@ type (
 		DisabledEndpointsSlice []string        `toml:"disabled-endpoints"`
 		DisabledEndpoints      map[string]bool `toml:"-"`
 
-		MinSizeForGzip int `toml:"timeout"`
+		MinSizeForGzip int `toml:"min-size-for-gzip"`
 	}
 
 	// Listener --
