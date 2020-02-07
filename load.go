@@ -18,7 +18,7 @@ import (
 //----------------------------------------------------------------------------------------------------------------------------//
 
 var (
-	configText   = []byte{}
+	configText   = ""
 	fullConfig   = interface{}(nil)
 	commonConfig = (*Common)(nil)
 
@@ -190,10 +190,9 @@ func LoadFile(fileName string, cfg interface{}) (err error) {
 	defer bufpool.PutBuf(newData)
 
 	data = newData.Bytes()
-	configText = make([]byte, len(data))
-	copy(configText, data)
+	configText = string(data)
 
-	err = toml.Unmarshal(newData.Bytes(), cfg)
+	err = toml.Unmarshal(data, cfg)
 	if err != nil {
 		return err
 	}
@@ -220,13 +219,6 @@ func LoadFile(fileName string, cfg interface{}) (err error) {
 
 //----------------------------------------------------------------------------------------------------------------------------//
 
-// GetText -- get prepared configuration text
-func GetText() []byte {
-	return configText
-}
-
-//----------------------------------------------------------------------------------------------------------------------------//
-
 // GetConfig --
 func GetConfig() interface{} {
 	return fullConfig
@@ -237,6 +229,40 @@ func GetConfig() interface{} {
 // GetCommon --
 func GetCommon() *Common {
 	return commonConfig
+}
+
+//----------------------------------------------------------------------------------------------------------------------------//
+
+var (
+	stdReplaces = map[string]string{
+		`(password\s*=\s*")(.*)(")`: `$1*$3`,
+		`(users\s*=\s*{)(.*)(})`:    `$1*$3`,
+	}
+
+	replace = misc.NewReplace()
+)
+
+func init() {
+	err := replace.AddMulti(stdReplaces)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "config.init: %s", err.Error())
+		os.Exit(misc.ExProgrammerError)
+	}
+}
+
+// AddFilter --
+func AddFilter(re string, replaceTo string) error {
+	return replace.Add(re, replaceTo)
+}
+
+// GetText -- get prepared configuration text
+func GetText() string {
+	return configText
+}
+
+// GetSecuredText -- get prepared configuration text with securing
+func GetSecuredText() string {
+	return replace.Do(configText)
 }
 
 //----------------------------------------------------------------------------------------------------------------------------//
