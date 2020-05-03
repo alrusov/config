@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"reflect"
 	"strings"
 
@@ -69,26 +68,26 @@ func Check(cfg interface{}, list []interface{}) error {
 		v := reflect.ValueOf(x)
 
 		if v.Kind() != reflect.Ptr {
-			misc.AddMessage(&msgs, fmt.Sprintf(`"%#v" is not pointer`, x))
+			misc.AddMessage(&msgs, `"%#v" is not a pointer`, x)
 			continue
 		}
 
 		//if v.Elem().Kind() != reflect.Struct {
-		//	misc.AddMessage(&msgs, fmt.Sprintf(`"%#v" is not pointer to struct`, x))
+		//	misc.AddMessage(&msgs, `"%#v" is not a pointer to struct`, x)
 		//	continue
 		//}
 
 		m := v.MethodByName("Check")
 
 		if m.Kind() != reflect.Func {
-			misc.AddMessage(&msgs, fmt.Sprintf(`"%#v" doesn't have the "Check" method`, x))
+			misc.AddMessage(&msgs, `"%#v" doesn't have the "Check" method`, x)
 			continue
 		}
 
 		e := m.Call([]reflect.Value{reflect.ValueOf(cfg)})
 
 		if len(e) != 1 || e[0].Kind() != reflect.Interface {
-			misc.AddMessage(&msgs, fmt.Sprintf(`"%#v" method "Check" returned illegal value`, x))
+			misc.AddMessage(&msgs, `"%#v" method "Check" returned illegal value`, x)
 			continue
 		}
 
@@ -98,7 +97,7 @@ func Check(cfg interface{}, list []interface{}) error {
 
 		err, ok := e[0].Interface().(error)
 		if !ok {
-			misc.AddMessage(&msgs, fmt.Sprintf(`"%#v" method "Check" returned not error value`, x))
+			misc.AddMessage(&msgs, `"%#v" method "Check" returned not error value`, x)
 			continue
 		}
 
@@ -106,7 +105,7 @@ func Check(cfg interface{}, list []interface{}) error {
 			continue
 		}
 
-		misc.AddMessage(&msgs, err.Error())
+		misc.AddMessage(&msgs, "%s", err.Error())
 	}
 
 	return misc.JoinedError(msgs)
