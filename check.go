@@ -55,6 +55,13 @@ func (x *Listener) Check(cfg interface{}) (err error) {
 		misc.AddMessage(&msgs, "Listener: basic auth enabled but users list is empty")
 	}
 
+	if x.Root != "" {
+		x.Root, err = misc.AbsPath(x.Root)
+		if err != nil {
+			misc.AddMessage(&msgs, "Listener.Root: %s", err.Error())
+		}
+	}
+
 	return misc.JoinedError(msgs)
 }
 

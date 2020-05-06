@@ -51,6 +51,8 @@ type (
 
 		BasicAuthEnabled bool           `toml:"basic-auth-enabled"`
 		Users            misc.StringMap `toml:"users"`
+
+		Root string `toml:"root"`
 	}
 
 	// DB --
@@ -71,6 +73,5 @@ const (
 	// ClientDefaultTimeout --
 	ClientDefaultTimeout = 5
 )
-
 
 //----------------------------------------------------------------------------------------------------------------------------//
