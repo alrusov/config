@@ -13,12 +13,13 @@ type (
 		Description string `toml:"description"`
 		Class       string `toml:"class"`
 
-		LogLocalTime    bool   `toml:"log-local-time"`
-		LogDir          string `toml:"log-dir"`
-		LogLevel        string `toml:"log-level"`
-		LogBufferSize   int    `toml:"log-buffer-size"`
-		LogBufferDelay  int    `toml:"log-buffer-delay"`
-		LogMaxStringLen int    `toml:"log-max-string-len"`
+		LogLocalTime    bool           `toml:"log-local-time"`
+		LogDir          string         `toml:"log-dir"`
+		LogLevel        string         `toml:"log-level"`  // default
+		LogLevels       misc.StringMap `toml:"log-levels"` // by facilities
+		LogBufferSize   int            `toml:"log-buffer-size"`
+		LogBufferDelay  int            `toml:"log-buffer-delay"`
+		LogMaxStringLen int            `toml:"log-max-string-len"`
 
 		GoMaxProcs int `toml:"go-max-procs"`
 
