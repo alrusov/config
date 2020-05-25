@@ -11,7 +11,6 @@ import (
 
 	"github.com/naoina/toml"
 
-	"github.com/alrusov/bufpool"
 	"github.com/alrusov/misc"
 )
 
@@ -85,7 +84,7 @@ func readFile(name string, base string) ([]byte, string, error) {
 func populate(data []byte, base string) (*bytes.Buffer, error) {
 	var msgs []string
 
-	newData := bufpool.GetBuf()
+	newData := new(bytes.Buffer)
 	list := bytes.Split(data, []byte("\n"))
 	n := 0
 
@@ -132,7 +131,6 @@ func populate(data []byte, base string) (*bytes.Buffer, error) {
 							msgs = append(msgs, fmt.Sprintf(`Include error "%s" in line %d`, err.Error(), n))
 							continue
 						}
-						defer bufpool.PutBuf(b)
 
 						line = bytes.Replace(line, matches[0], bytes.TrimSpace(b.Bytes()), -1)
 						continue
@@ -150,7 +148,6 @@ func populate(data []byte, base string) (*bytes.Buffer, error) {
 	}
 
 	if len(msgs) != 0 {
-		bufpool.PutBuf(newData)
 		return nil, misc.JoinedError(msgs)
 	}
 
@@ -187,7 +184,6 @@ func LoadFile(fileName string, cfg interface{}) (err error) {
 	if err != nil {
 		return err
 	}
-	defer bufpool.PutBuf(newData)
 
 	data = newData.Bytes()
 	configText = string(data)
