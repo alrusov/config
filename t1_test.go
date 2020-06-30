@@ -1,9 +1,9 @@
 package config
 
 import (
-	"encoding/json"
 	"testing"
 
+	"github.com/alrusov/jsonw"
 	"github.com/alrusov/misc"
 )
 
@@ -55,13 +55,13 @@ func TestPopulate(t *testing.T) {
 		return
 	}
 
-	jExpected, err := json.Marshal(expected)
+	jExpected, err := jsonw.Marshal(expected)
 	if err != nil {
 		t.Errorf(err.Error())
 		return
 	}
 
-	jLoaded, err := json.Marshal(loaded)
+	jLoaded, err := jsonw.Marshal(loaded)
 	if err != nil {
 		t.Errorf(err.Error())
 		return

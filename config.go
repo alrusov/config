@@ -34,6 +34,8 @@ type (
 		DisabledEndpointsSlice []string        `toml:"disabled-endpoints"`
 		DisabledEndpoints      map[string]bool `toml:"-"`
 
+		UseStdJSON bool `toml:"use-std-json"`
+
 		MinSizeForGzip int `toml:"min-size-for-gzip"`
 	}
 
