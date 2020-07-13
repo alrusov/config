@@ -232,6 +232,7 @@ func GetCommon() *Common {
 var (
 	stdReplaces = map[string]string{
 		`(password\s*=\s*")(.*)(")`: `$1*$3`,
+		`(secret\s*=\s*")(.*)(")`:   `$1*$3`,
 		`(users\s*=\s*{)(.*)(})`:    `$1*$3`,
 	}
 

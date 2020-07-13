@@ -21,12 +21,6 @@ func (x *Common) Check(cfg interface{}) (err error) {
 		x.LoadAvgPeriod = 60
 	}
 
-	x.DisabledEndpoints = make(map[string]bool, len(x.DisabledEndpointsSlice))
-	for _, name := range x.DisabledEndpointsSlice {
-		name = misc.NormalizeSlashes(name)
-		x.DisabledEndpoints[name] = true
-	}
-
 	return misc.JoinedError(msgs)
 }
 
@@ -47,12 +41,16 @@ func (x *Listener) Check(cfg interface{}) (err error) {
 		}
 	}
 
-	if x.Timeout == 0 {
+	if x.Timeout <= 0 {
 		x.Timeout = ListenerDefaultTimeout
 	}
 
 	if x.BasicAuthEnabled && len(x.Users) == 0 {
 		misc.AddMessage(&msgs, "Listener: basic auth enabled but users list is empty")
+	}
+
+	if x.JWTsecret != "" && len(x.Users) == 0 {
+		misc.AddMessage(&msgs, "Listener: jwt auth enabled but users list is empty")
 	}
 
 	if x.Root != "" {
@@ -61,6 +59,18 @@ func (x *Listener) Check(cfg interface{}) (err error) {
 			misc.AddMessage(&msgs, "Listener.Root: %s", err.Error())
 		}
 	}
+
+	x.DisabledEndpoints = Slice2Map(x.DisabledEndpointsSlice,
+		func(name string) string {
+			return misc.NormalizeSlashes(name)
+		},
+	)
+
+	x.JWTEndpoints = Slice2Map(x.JWTEndpointsSlice,
+		func(name string) string {
+			return misc.NormalizeSlashes(name)
+		},
+	)
 
 	return misc.JoinedError(msgs)
 }
@@ -116,6 +126,22 @@ func Check(cfg interface{}, list []interface{}) error {
 	}
 
 	return misc.JoinedError(msgs)
+}
+
+//----------------------------------------------------------------------------------------------------------------------------//
+
+// Slice2Map --
+func Slice2Map(src []string, conv func(string) string) (dst map[string]bool) {
+	dst = make(map[string]bool, len(src))
+
+	for _, name := range src {
+		if conv != nil {
+			name = conv(name)
+		}
+		dst[name] = true
+	}
+
+	return
 }
 
 //----------------------------------------------------------------------------------------------------------------------------//

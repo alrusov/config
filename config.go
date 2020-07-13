@@ -31,9 +31,6 @@ type (
 		ProfilerEnabled bool `toml:"profiler-enabled"`
 		DeepProfiling   bool `toml:"deep-profiling"`
 
-		DisabledEndpointsSlice []string        `toml:"disabled-endpoints"`
-		DisabledEndpoints      map[string]bool `toml:"-"`
-
 		UseStdJSON bool `toml:"use-std-json"`
 
 		MinSizeForGzip int `toml:"min-size-for-gzip"`
@@ -44,6 +41,8 @@ type (
 		// Addr should be set to the desired listening host:port
 		Addr string `toml:"bind-addr"`
 
+		Root string `toml:"root"`
+
 		// Set certificate in order to handle HTTPS requests
 		SSLCombinedPem string `toml:"ssl-combined-pem"`
 
@@ -52,10 +51,16 @@ type (
 
 		IconFile string `toml:"icon-file"`
 
-		BasicAuthEnabled bool           `toml:"basic-auth-enabled"`
-		Users            misc.StringMap `toml:"users"`
+		DisabledEndpointsSlice []string        `toml:"disabled-endpoints"`
+		DisabledEndpoints      map[string]bool `toml:"-"`
 
-		Root string `toml:"root"`
+		BasicAuthEnabled bool `toml:"basic-auth-enabled"`
+
+		JWTsecret         string          `toml:"jwt-secret"`
+		JWTEndpointsSlice []string        `toml:"jwt-endpoints"`
+		JWTEndpoints      map[string]bool `toml:"-"`
+
+		Users misc.StringMap `toml:"users"`
 	}
 
 	// DB --
