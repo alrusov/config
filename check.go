@@ -45,6 +45,10 @@ func (x *Listener) Check(cfg interface{}) (err error) {
 		x.Timeout = ListenerDefaultTimeout
 	}
 
+	if x.JWTlifetime <= 0 {
+		x.JWTlifetime = JWTdefaultLifetime
+	}
+
 	if x.BasicAuthEnabled && len(x.Users) == 0 {
 		misc.AddMessage(&msgs, "Listener: basic auth enabled but users list is empty")
 	}

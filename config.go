@@ -57,6 +57,7 @@ type (
 		BasicAuthEnabled bool `toml:"basic-auth-enabled"`
 
 		JWTsecret         string          `toml:"jwt-secret"`
+		JWTlifetime       int             `toml:"jwt-lifetime"`
 		JWTEndpointsSlice []string        `toml:"jwt-endpoints"`
 		JWTEndpoints      map[string]bool `toml:"-"`
 
@@ -80,6 +81,9 @@ const (
 
 	// ClientDefaultTimeout --
 	ClientDefaultTimeout = 5
+
+	// JWTdefaultLifetime --
+	JWTdefaultLifetime = 3600
 )
 
 //----------------------------------------------------------------------------------------------------------------------------//
