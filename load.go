@@ -82,7 +82,7 @@ func readFile(name string, base string) ([]byte, string, error) {
 //----------------------------------------------------------------------------------------------------------------------------//
 
 func populate(data []byte, base string) (*bytes.Buffer, error) {
-	var msgs []string
+	msgs := misc.Messages{}
 
 	newData := new(bytes.Buffer)
 	list := bytes.Split(data, []byte("\n"))
@@ -106,7 +106,7 @@ func populate(data []byte, base string) (*bytes.Buffer, error) {
 					name := string(matches[2])
 					v, exists := env[name]
 					if !exists {
-						msgs = append(msgs, fmt.Sprintf(`Undefined environment variable "%s" in line %d`, name, n))
+						msgs.Add(fmt.Sprintf(`Undefined environment variable "%s" in line %d`, name, n))
 						continue
 					}
 					line = bytes.Replace(line, matches[0], v, -1)
@@ -115,20 +115,20 @@ func populate(data []byte, base string) (*bytes.Buffer, error) {
 					if strings.HasPrefix(s, "include ") {
 						p := strings.Split(s, " ")
 						if len(p) != 2 {
-							msgs = append(msgs, fmt.Sprintf(`Illegal preprocessor command "%s" in line %d`, string(matches[2]), n))
+							msgs.Add(fmt.Sprintf(`Illegal preprocessor command "%s" in line %d`, string(matches[2]), n))
 							continue
 						}
 
 						var err error
 						repl, fn, err := readFile(p[1], base)
 						if err != nil {
-							msgs = append(msgs, fmt.Sprintf(`Include error "%s" in line %d`, err.Error(), n))
+							msgs.Add(fmt.Sprintf(`Include error "%s" in line %d`, err.Error(), n))
 							continue
 						}
 
 						b, err := populate(repl, filepath.Dir(fn))
 						if err != nil {
-							msgs = append(msgs, fmt.Sprintf(`Include error "%s" in line %d`, err.Error(), n))
+							msgs.Add(fmt.Sprintf(`Include error "%s" in line %d`, err.Error(), n))
 							continue
 						}
 
@@ -136,7 +136,7 @@ func populate(data []byte, base string) (*bytes.Buffer, error) {
 						continue
 					}
 
-					msgs = append(msgs, fmt.Sprintf(`Unknown preprocessor command "%s" in line %d`, string(matches[2]), n))
+					msgs.Add(fmt.Sprintf(`Unknown preprocessor command "%s" in line %d`, string(matches[2]), n))
 				}
 			}
 		}
@@ -147,8 +147,9 @@ func populate(data []byte, base string) (*bytes.Buffer, error) {
 		}
 	}
 
-	if len(msgs) != 0 {
-		return nil, misc.JoinedError(msgs)
+	err := msgs.Error()
+	if err != nil {
+		return nil, err
 	}
 
 	return newData, nil

@@ -11,7 +11,7 @@ import (
 
 // Check --
 func (x *Common) Check(cfg interface{}) (err error) {
-	var msgs []string
+	msgs := misc.Messages{}
 
 	if x.Name == "" {
 		x.Name = misc.AppName()
@@ -21,14 +21,14 @@ func (x *Common) Check(cfg interface{}) (err error) {
 		x.LoadAvgPeriod = 60
 	}
 
-	return misc.JoinedError(msgs)
+	return msgs.Error()
 }
 
 //----------------------------------------------------------------------------------------------------------------------------//
 
 // Check --
 func (x *Listener) Check(cfg interface{}) (err error) {
-	var msgs []string
+	msgs := misc.Messages{}
 
 	x.Addr = strings.TrimSpace(x.Addr)
 	x.SSLCombinedPem = strings.TrimSpace(x.SSLCombinedPem)
@@ -50,17 +50,17 @@ func (x *Listener) Check(cfg interface{}) (err error) {
 	}
 
 	if x.BasicAuthEnabled && len(x.Users) == 0 {
-		misc.AddMessage(&msgs, "Listener: basic auth enabled but users list is empty")
+		msgs.Add("Listener: basic auth enabled but users list is empty")
 	}
 
 	if x.JWTsecret != "" && len(x.Users) == 0 {
-		misc.AddMessage(&msgs, "Listener: jwt auth enabled but users list is empty")
+		msgs.Add("Listener: jwt auth enabled but users list is empty")
 	}
 
 	if x.Root != "" {
 		x.Root, err = misc.AbsPath(x.Root)
 		if err != nil {
-			misc.AddMessage(&msgs, "Listener.Root: %s", err.Error())
+			msgs.Add("Listener.Root: %s", err.Error())
 		}
 	}
 
@@ -76,39 +76,34 @@ func (x *Listener) Check(cfg interface{}) (err error) {
 		},
 	)
 
-	return misc.JoinedError(msgs)
+	return msgs.Error()
 }
 
 //----------------------------------------------------------------------------------------------------------------------------//
 
 // Check --
 func Check(cfg interface{}, list []interface{}) error {
-	var msgs []string
+	msgs := misc.Messages{}
 
 	for _, x := range list {
 		v := reflect.ValueOf(x)
 
 		if v.Kind() != reflect.Ptr {
-			misc.AddMessage(&msgs, `"%#v" is not a pointer`, x)
+			msgs.Add(`"%#v" is not a pointer`, x)
 			continue
 		}
-
-		//if v.Elem().Kind() != reflect.Struct {
-		//	misc.AddMessage(&msgs, `"%#v" is not a pointer to struct`, x)
-		//	continue
-		//}
 
 		m := v.MethodByName("Check")
 
 		if m.Kind() != reflect.Func {
-			misc.AddMessage(&msgs, `"%#v" doesn't have the "Check" method`, x)
+			msgs.Add(`"%#v" doesn't have the "Check" method`, x)
 			continue
 		}
 
 		e := m.Call([]reflect.Value{reflect.ValueOf(cfg)})
 
 		if len(e) != 1 || e[0].Kind() != reflect.Interface {
-			misc.AddMessage(&msgs, `"%#v" method "Check" returned illegal value`, x)
+			msgs.Add(`"%#v" method "Check" returned illegal value`, x)
 			continue
 		}
 
@@ -118,7 +113,7 @@ func Check(cfg interface{}, list []interface{}) error {
 
 		err, ok := e[0].Interface().(error)
 		if !ok {
-			misc.AddMessage(&msgs, `"%#v" method "Check" returned not error value`, x)
+			msgs.Add(`"%#v" method "Check" returned not error value`, x)
 			continue
 		}
 
@@ -126,10 +121,10 @@ func Check(cfg interface{}, list []interface{}) error {
 			continue
 		}
 
-		misc.AddMessage(&msgs, "%s", err.Error())
+		msgs.Add("%s", err.Error())
 	}
 
-	return misc.JoinedError(msgs)
+	return msgs.Error()
 }
 
 //----------------------------------------------------------------------------------------------------------------------------//
