@@ -1,8 +1,8 @@
 github.com/alrusov/jsonw v0.1.0 h1:A4Ymili5ieu7pvtK+s52Ng75qCM6K/Z5h5j9twYyjlk=
 github.com/alrusov/jsonw v0.1.0/go.mod h1:azE1xRu6TOXoMgG42/I/ZMhzfFb5FkUziUlZ4KR4rCs=
 github.com/alrusov/misc v0.1.19/go.mod h1:ylFoP0hgLCkK2QfVE4pHRSQW2rQ+sPd55h3GPeI+Nf8=
-github.com/alrusov/misc v0.1.21 h1:EFN04C8U0FHA9Frg5rxrrLk/Tg/9bG6GbRXrYICb9AI=
-github.com/alrusov/misc v0.1.21/go.mod h1:ylFoP0hgLCkK2QfVE4pHRSQW2rQ+sPd55h3GPeI+Nf8=
+github.com/alrusov/misc v0.1.22 h1:gP6eFvt+pzzr/1fxkmAatfsc2hZ69+SxlVqKGkMXQSc=
+github.com/alrusov/misc v0.1.22/go.mod h1:ylFoP0hgLCkK2QfVE4pHRSQW2rQ+sPd55h3GPeI+Nf8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/google/gofuzz v1.0.0/go.mod h1:dBl0BpW6vV/+mYPU4Po3pmUjxk6FQPldtuIdl/M65Eg=
