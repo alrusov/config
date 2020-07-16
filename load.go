@@ -11,6 +11,7 @@ import (
 
 	"github.com/naoina/toml"
 
+	"github.com/alrusov/log"
 	"github.com/alrusov/misc"
 )
 
@@ -106,8 +107,8 @@ func populate(data []byte, base string) (*bytes.Buffer, error) {
 					name := string(matches[2])
 					v, exists := env[name]
 					if !exists {
-						msgs.Add(fmt.Sprintf(`Undefined environment variable "%s" in line %d`, name, n))
-						continue
+						log.Message(log.NOTICE, `Undefined environment variable "%s" in line %d, using empty value`, name, n)
+						v = []byte("")
 					}
 					line = bytes.Replace(line, matches[0], v, -1)
 				case "#":
