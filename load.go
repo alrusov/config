@@ -31,20 +31,6 @@ var (
 
 //----------------------------------------------------------------------------------------------------------------------------//
 
-func loadEnv() {
-	osEnv := fEnv()
-	for _, s := range osEnv {
-		df := strings.SplitN(s, "=", 2)
-		v := ""
-		if len(df) > 1 {
-			v = df[1]
-		}
-		env[df[0]] = []byte(v)
-	}
-}
-
-//----------------------------------------------------------------------------------------------------------------------------//
-
 func readFile(name string, base string) ([]byte, string, error) {
 	name, err := misc.AbsPathEx(name, base)
 	if err != nil {
@@ -82,15 +68,20 @@ func readFile(name string, base string) ([]byte, string, error) {
 
 //----------------------------------------------------------------------------------------------------------------------------//
 
-func populate(data []byte, base string) (*bytes.Buffer, error) {
+func populate(data []byte, base string, lineNumber *uint) (newData *bytes.Buffer, withWarn bool, err error) {
+	n := uint(0)
+	if lineNumber == nil {
+		lineNumber = &n
+	}
+
+	newData = new(bytes.Buffer)
+	withWarn = false
+
 	msgs := misc.Messages{}
 
-	newData := new(bytes.Buffer)
 	list := bytes.Split(data, []byte("\n"))
-	n := 0
 
 	for _, line := range list {
-		n++
 		line = bytes.TrimSpace(line)
 		if len(line) == 0 {
 			continue
@@ -98,6 +89,8 @@ func populate(data []byte, base string) (*bytes.Buffer, error) {
 		if line[0] == '#' {
 			continue
 		}
+
+		*lineNumber++
 
 		findResult := rePreprocessor.FindAllSubmatch(line, -1)
 		if findResult != nil {
@@ -107,7 +100,8 @@ func populate(data []byte, base string) (*bytes.Buffer, error) {
 					name := string(matches[2])
 					v, exists := env[name]
 					if !exists {
-						log.Message(log.NOTICE, `Undefined environment variable "%s" in line %d, using empty value`, name, n)
+						withWarn = true
+						log.Message(log.WARNING, `Undefined environment variable "%s" in line %d, using empty value`, name, *lineNumber)
 						v = []byte("")
 					}
 					line = bytes.Replace(line, matches[0], v, -1)
@@ -116,20 +110,24 @@ func populate(data []byte, base string) (*bytes.Buffer, error) {
 					if strings.HasPrefix(s, "include ") {
 						p := strings.Split(s, " ")
 						if len(p) != 2 {
-							msgs.Add(fmt.Sprintf(`Illegal preprocessor command "%s" in line %d`, string(matches[2]), n))
+							msgs.Add(fmt.Sprintf(`Illegal preprocessor command "%s" in line %d`, string(matches[2]), *lineNumber))
 							continue
 						}
 
 						var err error
 						repl, fn, err := readFile(p[1], base)
 						if err != nil {
-							msgs.Add(fmt.Sprintf(`Include error "%s" in line %d`, err.Error(), n))
+							msgs.Add(fmt.Sprintf(`Include error "%s" in line %d`, err.Error(), *lineNumber))
 							continue
 						}
 
-						b, err := populate(repl, filepath.Dir(fn))
+						*lineNumber--
+						b, w, err := populate(repl, filepath.Dir(fn), lineNumber)
+						if w {
+							withWarn = true
+						}
 						if err != nil {
-							msgs.Add(fmt.Sprintf(`Include error "%s" in line %d`, err.Error(), n))
+							msgs.Add(fmt.Sprintf(`Include error "%s" in line %d`, err.Error(), *lineNumber))
 							continue
 						}
 
@@ -137,7 +135,7 @@ func populate(data []byte, base string) (*bytes.Buffer, error) {
 						continue
 					}
 
-					msgs.Add(fmt.Sprintf(`Unknown preprocessor command "%s" in line %d`, string(matches[2]), n))
+					msgs.Add(fmt.Sprintf(`Unknown preprocessor command "%s" in line %d`, string(matches[2]), *lineNumber))
 				}
 			}
 		}
@@ -148,12 +146,9 @@ func populate(data []byte, base string) (*bytes.Buffer, error) {
 		}
 	}
 
-	err := msgs.Error()
-	if err != nil {
-		return nil, err
-	}
+	err = msgs.Error()
 
-	return newData, nil
+	return
 }
 
 //----------------------------------------------------------------------------------------------------------------------------//
@@ -166,25 +161,29 @@ func LoadFile(fileName string, cfg interface{}) (err error) {
 
 	data, fn, err := readFile(fileName, misc.AppWorkDir())
 	if err != nil {
-		return err
+		return
 	}
 
+	withWarn := false
+
 	defer func() {
-		if err != nil {
+		if err != nil || withWarn {
 			msg := new(bytes.Buffer)
-			msg.WriteString(err.Error() + "\n>>>\n")
+			msg.WriteString("Config file:\n>>>\n")
 			lines := bytes.Split(data, []byte("\n"))
 			for i, line := range lines {
 				msg.WriteString(fmt.Sprintf("%04d | %s\n", i+1, bytes.TrimSpace(line)))
 			}
 			msg.WriteString("<<<")
-			err = fmt.Errorf("%s", string(msg.Bytes()))
+
+			log.Message(log.WARNING, "%s", string(msg.Bytes()))
 		}
 	}()
 
-	newData, err := populate(data, filepath.Dir(fn))
+	var newData *bytes.Buffer
+	newData, withWarn, err = populate(data, filepath.Dir(fn), nil)
 	if err != nil {
-		return err
+		return
 	}
 
 	data = newData.Bytes()
@@ -192,7 +191,7 @@ func LoadFile(fileName string, cfg interface{}) (err error) {
 
 	err = toml.Unmarshal(data, cfg)
 	if err != nil {
-		return err
+		return
 	}
 
 	fullConfig = cfg
@@ -212,7 +211,7 @@ func LoadFile(fileName string, cfg interface{}) (err error) {
 		}
 	}
 
-	return nil
+	return
 }
 
 //----------------------------------------------------------------------------------------------------------------------------//
@@ -262,6 +261,20 @@ func GetText() string {
 // GetSecuredText -- get prepared configuration text with securing
 func GetSecuredText() string {
 	return replace.Do(configText)
+}
+
+//----------------------------------------------------------------------------------------------------------------------------//
+
+func loadEnv() {
+	osEnv := fEnv()
+	for _, s := range osEnv {
+		df := strings.SplitN(s, "=", 2)
+		v := ""
+		if len(df) > 1 {
+			v = df[1]
+		}
+		env[df[0]] = []byte(v)
+	}
 }
 
 //----------------------------------------------------------------------------------------------------------------------------//
