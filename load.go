@@ -166,11 +166,13 @@ func LoadFile(fileName string, cfg interface{}) (err error) {
 
 	withWarn := false
 
+	var newData *bytes.Buffer
+
 	defer func() {
 		if err != nil || withWarn {
 			msg := new(bytes.Buffer)
 			msg.WriteString("Config file:\n>>>\n")
-			lines := bytes.Split(data, []byte("\n"))
+			lines := bytes.Split(newData.Bytes(), []byte("\n"))
 			for i, line := range lines {
 				msg.WriteString(fmt.Sprintf("%04d | %s\n", i+1, bytes.TrimSpace(line)))
 			}
@@ -180,7 +182,6 @@ func LoadFile(fileName string, cfg interface{}) (err error) {
 		}
 	}()
 
-	var newData *bytes.Buffer
 	newData, withWarn, err = populate(data, filepath.Dir(fn), nil)
 	if err != nil {
 		return

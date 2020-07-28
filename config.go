@@ -7,6 +7,11 @@ import (
 //----------------------------------------------------------------------------------------------------------------------------//
 
 type (
+	// App --
+	App interface {
+		Check() (err error)
+	}
+
 	// Common --
 	Common struct {
 		Name        string `toml:"name"`
