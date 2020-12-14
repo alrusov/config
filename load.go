@@ -77,7 +77,7 @@ func populate(data []byte, base string, lineNumber *uint) (newData *bytes.Buffer
 	newData = new(bytes.Buffer)
 	withWarn = false
 
-	msgs := misc.Messages{}
+	msgs := misc.NewMessages()
 
 	list := bytes.Split(data, []byte("\n"))
 

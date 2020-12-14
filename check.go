@@ -11,7 +11,7 @@ import (
 
 // Check --
 func (x *Common) Check(cfg interface{}) (err error) {
-	msgs := misc.Messages{}
+	msgs := misc.NewMessages()
 
 	if x.Name == "" {
 		x.Name = misc.AppName()
@@ -28,7 +28,7 @@ func (x *Common) Check(cfg interface{}) (err error) {
 
 // Check --
 func (x *Listener) Check(cfg interface{}) (err error) {
-	msgs := misc.Messages{}
+	msgs := misc.NewMessages()
 
 	x.Addr = strings.TrimSpace(x.Addr)
 	x.SSLCombinedPem = strings.TrimSpace(x.SSLCombinedPem)
@@ -83,7 +83,7 @@ func (x *Listener) Check(cfg interface{}) (err error) {
 
 // Check --
 func Check(cfg interface{}, list []interface{}) error {
-	msgs := misc.Messages{}
+	msgs := misc.NewMessages()
 
 	for _, x := range list {
 		v := reflect.ValueOf(x)
