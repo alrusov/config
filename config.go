@@ -46,7 +46,9 @@ type (
 		// Addr should be set to the desired listening host:port
 		Addr string `toml:"bind-addr"`
 
-		Root string `toml:"root"`
+		Root string `toml:"root"` // in filesystem
+
+		ProxyPrefix string `toml:"proxy-prefix"`
 
 		// Set certificate in order to handle HTTPS requests
 		SSLCombinedPem string `toml:"ssl-combined-pem"`

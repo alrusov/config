@@ -64,6 +64,10 @@ func (x *Listener) Check(cfg interface{}) (err error) {
 		}
 	}
 
+	if x.ProxyPrefix != "" {
+		x.ProxyPrefix = misc.NormalizeSlashes("/" + x.ProxyPrefix)
+	}
+
 	x.DisabledEndpoints = Slice2Map(x.DisabledEndpointsSlice,
 		func(name string) string {
 			return misc.NormalizeSlashes(name)
