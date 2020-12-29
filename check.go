@@ -74,7 +74,7 @@ func (x *Listener) Check(cfg interface{}) (err error) {
 		},
 	)
 
-	x.JWTEndpoints = Slice2Map(x.JWTEndpointsSlice,
+	x.AuthEndpoints = Slice2Map(x.AuthEndpointsSlice,
 		func(name string) string {
 			return misc.NormalizeSlashes(name)
 		},

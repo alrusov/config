@@ -63,10 +63,11 @@ type (
 
 		BasicAuthEnabled bool `toml:"basic-auth-enabled"`
 
-		JWTsecret         string          `toml:"jwt-secret"`
-		JWTlifetime       int             `toml:"jwt-lifetime"`
-		JWTEndpointsSlice []string        `toml:"jwt-endpoints"`
-		JWTEndpoints      map[string]bool `toml:"-"`
+		JWTsecret   string `toml:"jwt-secret"`
+		JWTlifetime int    `toml:"jwt-lifetime"`
+
+		AuthEndpointsSlice []string        `toml:"auth-endpoints"`
+		AuthEndpoints      map[string]bool `toml:"-"`
 
 		Users misc.StringMap `toml:"users"`
 	}
