@@ -57,10 +57,17 @@ func (x *Listener) Check(cfg interface{}) (err error) {
 		msgs.Add("Listener: jwt auth enabled but users list is empty")
 	}
 
+	if x.Krb5KeyFile != "" {
+		x.Krb5KeyFile, err = misc.AbsPath(x.Krb5KeyFile)
+		if err != nil {
+			msgs.Add("Listener.krb5-key-file: %s", err.Error())
+		}
+	}
+
 	if x.Root != "" {
 		x.Root, err = misc.AbsPath(x.Root)
 		if err != nil {
-			msgs.Add("Listener.Root: %s", err.Error())
+			msgs.Add("Listener.root: %s", err.Error())
 		}
 	}
 

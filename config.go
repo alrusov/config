@@ -66,6 +66,8 @@ type (
 		JWTsecret   string `toml:"jwt-secret"`
 		JWTlifetime int    `toml:"jwt-lifetime"`
 
+		Krb5KeyFile string `toml:"krb5-key-file"`
+
 		AuthEndpointsSlice []string        `toml:"auth-endpoints"`
 		AuthEndpoints      map[string]bool `toml:"-"`
 
