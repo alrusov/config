@@ -153,7 +153,7 @@ func TestAddMethod(t *testing.T) {
 	}
 
 	err := AddAuthMethod("test", &cfg{},
-		func(cfg interface{}) (err error) {
+		func(cfg *AuthMethod) (err error) {
 			return
 		},
 	)

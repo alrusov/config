@@ -13,7 +13,7 @@ var knownAuthMethods = map[string]*authMethod{}
 
 type (
 	// AuthMethodCheck --
-	AuthMethodCheck = func(options interface{}) (err error)
+	AuthMethodCheck = func(*AuthMethod) (err error)
 
 	authMethod struct {
 		pattern  interface{}
@@ -189,7 +189,7 @@ func (x *Auth) Check(cfg interface{}) (err error) {
 		}
 
 		if methodDef.check != nil {
-			err = methodDef.check(method.Options)
+			err = methodDef.check(method)
 			if err != nil {
 				msgs.Add(`%s: %v`, methodName, err)
 				continue
