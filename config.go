@@ -61,17 +61,24 @@ type (
 		DisabledEndpointsSlice []string        `toml:"disabled-endpoints"`
 		DisabledEndpoints      map[string]bool `toml:"-"`
 
-		BasicAuthEnabled bool `toml:"basic-auth-enabled"`
+		Auth Auth `toml:"auth"`
+	}
 
-		JWTsecret   string `toml:"jwt-secret"`
-		JWTlifetime int    `toml:"jwt-lifetime"`
-
-		Krb5KeyFile string `toml:"krb5-key-file"`
-
-		AuthEndpointsSlice []string        `toml:"auth-endpoints"`
-		AuthEndpoints      map[string]bool `toml:"-"`
+	// Auth --
+	Auth struct {
+		EndpointsSlice []string        `toml:"endpoints"`
+		Endpoints      map[string]bool `toml:"-"`
 
 		Users misc.StringMap `toml:"users"`
+
+		Methods map[string]*AuthMethod `toml:"methods"`
+	}
+
+	// AuthMethod --
+	AuthMethod struct {
+		Enabled    bool              `toml:"enabled"`
+		OptionsMap misc.InterfaceMap `toml:"options"`
+		Options    interface{}       `toml:"-"`
 	}
 
 	// DB --
@@ -81,6 +88,15 @@ type (
 		Timeout int    `toml:"timeout"`
 		Retry   int    `toml:"retry"`
 	}
+)
+
+const (
+	// AuthMethodBasic --
+	AuthMethodBasic = "basic"
+	// AuthMethodJWT --
+	AuthMethodJWT = "jwt"
+	// AuthMethodKrb5 --
+	AuthMethodKrb5 = "krb5"
 )
 
 //----------------------------------------------------------------------------------------------------------------------------//

@@ -31,7 +31,6 @@ func (x *Listener) Check(cfg interface{}) (err error) {
 	msgs := misc.NewMessages()
 
 	x.Addr = strings.TrimSpace(x.Addr)
-	x.SSLCombinedPem = strings.TrimSpace(x.SSLCombinedPem)
 
 	if x.Addr == "" {
 		if x.SSLCombinedPem == "" {
@@ -41,38 +40,33 @@ func (x *Listener) Check(cfg interface{}) (err error) {
 		}
 	}
 
-	if x.Timeout <= 0 {
-		x.Timeout = ListenerDefaultTimeout
-	}
-
-	if x.JWTlifetime <= 0 {
-		x.JWTlifetime = JWTdefaultLifetime
-	}
-
-	if x.BasicAuthEnabled && len(x.Users) == 0 {
-		msgs.Add("Listener: basic auth enabled but users list is empty")
-	}
-
-	if x.JWTsecret != "" && len(x.Users) == 0 {
-		msgs.Add("Listener: jwt auth enabled but users list is empty")
-	}
-
-	if x.Krb5KeyFile != "" {
-		x.Krb5KeyFile, err = misc.AbsPath(x.Krb5KeyFile)
-		if err != nil {
-			msgs.Add("Listener.krb5-key-file: %s", err.Error())
-		}
-	}
-
 	if x.Root != "" {
 		x.Root, err = misc.AbsPath(x.Root)
 		if err != nil {
-			msgs.Add("Listener.root: %s", err.Error())
+			msgs.Add("Listener.root: %v", err)
 		}
 	}
 
 	if x.ProxyPrefix != "" {
 		x.ProxyPrefix = misc.NormalizeSlashes("/" + x.ProxyPrefix)
+	}
+
+	if x.SSLCombinedPem != "" {
+		x.SSLCombinedPem, err = misc.AbsPath(x.SSLCombinedPem)
+		if err != nil {
+			msgs.Add("Listener.ssl-combined-pem: %v", err)
+		}
+	}
+
+	if x.Timeout <= 0 {
+		x.Timeout = ListenerDefaultTimeout
+	}
+
+	if x.IconFile != "" {
+		x.IconFile, err = misc.AbsPath(x.IconFile)
+		if err != nil {
+			msgs.Add("Listener.icon-file: %v", err)
+		}
 	}
 
 	x.DisabledEndpoints = Slice2Map(x.DisabledEndpointsSlice,
@@ -81,11 +75,10 @@ func (x *Listener) Check(cfg interface{}) (err error) {
 		},
 	)
 
-	x.AuthEndpoints = Slice2Map(x.AuthEndpointsSlice,
-		func(name string) string {
-			return misc.NormalizeSlashes(name)
-		},
-	)
+	err = x.Auth.Check(cfg)
+	if err != nil {
+		msgs.Add("Listener.root: %v", err)
+	}
 
 	return msgs.Error()
 }
@@ -132,7 +125,7 @@ func Check(cfg interface{}, list []interface{}) error {
 			continue
 		}
 
-		msgs.Add("%s", err.Error())
+		msgs.Add("%v", err)
 	}
 
 	return msgs.Error()

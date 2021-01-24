@@ -14,3 +14,27 @@ param-last = { \
   "x" = 1,     \
   "y" = "Y",   \
 }
+
+[http]
+listener = { bind-addr = ":1234", ssl-combined-pem = "", timeout = 6, \
+	root = "", \
+	proxy-prefix = "/config-test/", \
+	icon-file = "/tmp/favicon.ico", \
+	disabled-endpoints = [ "/aaa*", "!/aaa/bbb" ], \
+	auth = { \
+		endpoints = ["/xxx"], \
+		users = {{#include ^users.toml}}, \
+		methods = { \
+			basic = { enabled = true, options = {} }, \
+			jwt   = { enabled = true, options = { secret = "secret-secret", lifetime = 157680000 } }, \
+		} \
+	} \
+}
+
+
+#
+# 
+#             basic-auth-enabled = false, \
+#             jwt-secret = "{$JWT_SECRET}", \
+#             jwt-lifetime = 157680000, \
+#             krb5-key-file = "", \
