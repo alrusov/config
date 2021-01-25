@@ -67,11 +67,8 @@ func readFile(name string, base string) ([]byte, string, error) {
 		return nil, name, fmt.Errorf("File read error - got %d bytes, expected %d", dSize, fSize)
 	}
 
-	fmt.Printf("%q\n---\n", data)
 	data = bytes.TrimSpace(reComment.ReplaceAll(data, []byte{}))
-	fmt.Printf("%q\n---\n", data)
 	data = bytes.TrimSpace(reMultiLine.ReplaceAll(data, []byte{' '}))
-	fmt.Printf("%q\n---\n", data)
 	data = bytes.TrimRight(data, "\\")
 
 	return data, name, nil
