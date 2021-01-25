@@ -23,7 +23,12 @@ var (
 	commonConfig = (*Common)(nil)
 
 	rePreprocessor = regexp.MustCompile(`(?:\{)([\$#])([^\}]+)(?:\})`)
-	reMultiLine    = regexp.MustCompile(`(?m)[[:space:]]*\\\r?\n[[:space:]]*`)
+
+	// Use the # symbol at the begining of the line for comment
+	reComment = regexp.MustCompile(`(?m)^\s*#.*$`)
+
+	// Use the \ symbol at the end line to continue to next line
+	reMultiLine = regexp.MustCompile(`(?m)\s*\\\s*\r?\n\s*`)
 
 	fEnv = os.Environ
 	env  = make(map[string][]byte)
@@ -62,7 +67,13 @@ func readFile(name string, base string) ([]byte, string, error) {
 		return nil, name, fmt.Errorf("File read error - got %d bytes, expected %d", dSize, fSize)
 	}
 
-	data = bytes.TrimSpace(reMultiLine.ReplaceAll(data, []byte(" ")))
+	fmt.Printf("%q\n---\n", data)
+	data = bytes.TrimSpace(reComment.ReplaceAll(data, []byte{}))
+	fmt.Printf("%q\n---\n", data)
+	data = bytes.TrimSpace(reMultiLine.ReplaceAll(data, []byte{' '}))
+	fmt.Printf("%q\n---\n", data)
+	data = bytes.TrimRight(data, "\\")
+
 	return data, name, nil
 }
 

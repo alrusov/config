@@ -1,6 +1,7 @@
 package config
 
 import (
+	"bytes"
 	"reflect"
 	"testing"
 
@@ -188,3 +189,28 @@ func TestCloneStruct(t *testing.T) {
 		t.Fatalf("src=%#v\nnot equal\ndst=%#v", src, dst)
 	}
 }
+
+//----------------------------------------------------------------------------------------------------------------------------//
+
+func TestPreproc(t *testing.T) {
+	data := []byte(`auth = { \
+endpoints = [], \
+					# use /sha?p=<password> for encoding       
+# password pwd1       
+user1 = "94af3fa5261b347f098bd9cf0fc1c145a20e1f662cb21b0d4a763398ac886f19017cb7d8bfd71df689108511f6f8d0c1ab464a80620d4332379d544ba67131a0", \
+	# password pwd2
+	user2 = "3ebd594bccb9f9e076cd90eea1f6c46efef9a78a7b58f13fe89d2184160027a3fb6ca1d81073bb64923f3a4fd6b456f04c70a0881827ce43bcfd2642ed93b3d8", \		
+}
+`)
+
+	expection := `auth = { endpoints = [], user1 = "94af3fa5261b347f098bd9cf0fc1c145a20e1f662cb21b0d4a763398ac886f19017cb7d8bfd71df689108511f6f8d0c1ab464a80620d4332379d544ba67131a0", user2 = "3ebd594bccb9f9e076cd90eea1f6c46efef9a78a7b58f13fe89d2184160027a3fb6ca1d81073bb64923f3a4fd6b456f04c70a0881827ce43bcfd2642ed93b3d8", }`
+
+	data = bytes.TrimSpace(reComment.ReplaceAll(data, []byte{}))
+	data = bytes.TrimSpace(reMultiLine.ReplaceAll(data, []byte{' '}))
+
+	if string(data) != string(expection) {
+		t.Fatalf("result:\n%q\nis not equal expection:\n%q", data, expection)
+	}
+}
+
+//----------------------------------------------------------------------------------------------------------------------------//

@@ -77,7 +77,7 @@ func (x *Listener) Check(cfg interface{}) (err error) {
 
 	err = x.Auth.Check(cfg)
 	if err != nil {
-		msgs.Add("Listener.root: %v", err)
+		msgs.Add("Listener.auth: %v", err)
 	}
 
 	return msgs.Error()

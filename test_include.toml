@@ -1,3 +1,5 @@
+# begin
+
 param-3 = "!@#$%^&@ \
 	qwertyuiop \
 	asdfghjkl\
@@ -6,6 +8,11 @@ param-3 = "!@#$%^&@ \
 
 param-4 = 123456
 param-5 = {                              \
+    # field1
     "field1"        = "val1",            \
+    # field2
     "field2"        = 777,              \
+    # ---
 }
+
+    # end

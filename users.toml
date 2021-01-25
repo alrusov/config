@@ -1,3 +1,17 @@
+
+
+
+
+#
+#  BEGIN
+#
+# the first user
 test-user1 = "pwd1", \
-test-user2 = "pwd2"  \
+# the second user
+test-user2 = "pwd2", \
+#
+#  END
+#
+
+
 
