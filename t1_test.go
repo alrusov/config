@@ -72,16 +72,22 @@ func TestPopulate(t *testing.T) {
 				DisabledEndpointsSlice: []string{"/aaa*", "!/aaa/bbb"},
 				DisabledEndpoints:      misc.BoolMap{"/aaa*": true, "!/aaa/bbb": true},
 				Auth: Auth{
-					EndpointsSlice: []string{"/xxx"},
-					Endpoints:      misc.BoolMap{"/xxx": true},
-					Users:          misc.StringMap{"test-user1": "pwd1", "test-user2": "pwd2"},
+					EndpointsSlice: map[string][]string{
+						"/xxx/": {" *       "},
+						"/yyy":  {" user1 ", " user2", " @group1  ", " ! @group2  ", " !user3", "!", " ! "},
+					},
+					Endpoints: map[string]misc.BoolMap{
+						"/xxx": {"*": true},
+						"/yyy": {"user1": true, "user2": true, "@group1": true, "@group2": false, "user3": false},
+					},
+					Users: misc.StringMap{"test-user1": "pwd1", "test-user2": "pwd2"},
 					Methods: map[string]*AuthMethod{
-						"basic": &AuthMethod{
+						"basic": {
 							Enabled:    true,
 							OptionsMap: misc.InterfaceMap{},
 							Options:    &basicOptions{},
 						},
-						"jwt": &AuthMethod{
+						"jwt": {
 							Enabled:    true,
 							OptionsMap: misc.InterfaceMap{"secret": "secret-secret", "lifetime": float64(157680000)},
 							Options:    &jwtOptions{Secret: "secret-secret", Lifetime: 157680000},
@@ -150,7 +156,7 @@ func TestAddMethod(t *testing.T) {
 		Field6 float32 `toml:"field6"`
 		Field7 float64 `toml:"field7"`
 		Field8 bool    `toml:"field8"`
-		//Field9 map[string]bool
+		//Field9 misc.BoolMap
 	}
 
 	err := AddAuthMethod("test", &cfg{},

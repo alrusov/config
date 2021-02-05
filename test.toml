@@ -22,7 +22,7 @@ listener = { bind-addr = ":1234", ssl-combined-pem = "", timeout = 6, \
 	icon-file = "/tmp/favicon.ico", \
 	disabled-endpoints = [ "/aaa*", "!/aaa/bbb" ], \
 	auth = { \
-		endpoints = ["/xxx"], \
+		endpoints = {"/xxx/" = [" *       "], "/yyy" = [" user1 ", " user2", " @group1  "," ! @group2  ", " !user3", "!", " ! "] }, \
 		users = {{#include ^users.toml}}, \
 		methods = { \
 			basic = { enabled = true, options = {} }, \

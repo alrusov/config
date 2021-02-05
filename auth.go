@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/alrusov/misc"
 )
@@ -112,11 +113,7 @@ func AddAuthMethod(name string, options interface{}, checkConfig AuthMethodCheck
 func (x *Auth) Check(cfg interface{}) (err error) {
 	msgs := misc.NewMessages()
 
-	x.Endpoints = Slice2Map(x.EndpointsSlice,
-		func(name string) string {
-			return misc.NormalizeSlashes(name)
-		},
-	)
+	x.Endpoints = authSlice2Map(x.EndpointsSlice)
 
 	for methodName, method := range x.Methods {
 		methodDef, exists := knownAuthMethods[methodName]
@@ -230,6 +227,31 @@ func cloneStruct(src interface{}) (dst reflect.Value, err error) {
 
 	for i := 0; i < nf; i++ {
 		dstV.Field(i).Set(srcV.Field(i))
+	}
+
+	return
+}
+
+//----------------------------------------------------------------------------------------------------------------------------//
+
+// authSlice2Map --
+func authSlice2Map(src map[string][]string) (dst map[string]misc.BoolMap) {
+	dst = make(map[string]misc.BoolMap, len(src))
+
+	for path, list := range src {
+		path = misc.NormalizeSlashes(path)
+		mList := make(misc.BoolMap, len(list))
+		for _, u := range list {
+			u = strings.TrimSpace(u)
+			v := u[0] != '!'
+			if !v {
+				u = strings.TrimSpace(u[1:])
+			}
+			if u != "" {
+				mList[u] = v
+			}
+		}
+		dst[path] = mList
 	}
 
 	return

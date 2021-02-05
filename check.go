@@ -69,7 +69,7 @@ func (x *Listener) Check(cfg interface{}) (err error) {
 		}
 	}
 
-	x.DisabledEndpoints = Slice2Map(x.DisabledEndpointsSlice,
+	x.DisabledEndpoints = StringSlice2Map(x.DisabledEndpointsSlice,
 		func(name string) string {
 			return misc.NormalizeSlashes(name)
 		},
@@ -133,9 +133,9 @@ func Check(cfg interface{}, list []interface{}) error {
 
 //----------------------------------------------------------------------------------------------------------------------------//
 
-// Slice2Map --
-func Slice2Map(src []string, conv func(string) string) (dst map[string]bool) {
-	dst = make(map[string]bool, len(src))
+// StringSlice2Map --
+func StringSlice2Map(src []string, conv func(name string) string) (dst misc.BoolMap) {
+	dst = make(misc.BoolMap, len(src))
 
 	for _, name := range src {
 		if conv != nil {

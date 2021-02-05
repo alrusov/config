@@ -58,16 +58,16 @@ type (
 
 		IconFile string `toml:"icon-file"`
 
-		DisabledEndpointsSlice []string        `toml:"disabled-endpoints"`
-		DisabledEndpoints      map[string]bool `toml:"-"`
+		DisabledEndpointsSlice []string     `toml:"disabled-endpoints"`
+		DisabledEndpoints      misc.BoolMap `toml:"-"`
 
 		Auth Auth `toml:"auth"`
 	}
 
 	// Auth --
 	Auth struct {
-		EndpointsSlice []string        `toml:"endpoints"`
-		Endpoints      map[string]bool `toml:"-"`
+		EndpointsSlice map[string][]string     `toml:"endpoints"`
+		Endpoints      map[string]misc.BoolMap `toml:"-"`
 
 		Users misc.StringMap `toml:"users"`
 
