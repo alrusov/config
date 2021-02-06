@@ -9,6 +9,10 @@
 test-user1 = "pwd1", \
 # the second user
 test-user2 = "pwd2", \
+# users with group
+"test-user3@   g0  " = "pwd3", \
+"test-user4@g1" = "pwd4", \
+"test-user5  @  g1,g2,g3, g5@xxx , @g6@  " = "pwd5", \
 #
 #  END
 #

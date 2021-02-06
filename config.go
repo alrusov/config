@@ -69,9 +69,16 @@ type (
 		EndpointsSlice map[string][]string     `toml:"endpoints"`
 		Endpoints      map[string]misc.BoolMap `toml:"-"`
 
-		Users misc.StringMap `toml:"users"`
+		UsersMap misc.StringMap  `toml:"users"`
+		Users    map[string]User `toml:"-"`
 
 		Methods map[string]*AuthMethod `toml:"methods"`
+	}
+
+	// User --
+	User struct {
+		Password string
+		Groups   []string
 	}
 
 	// AuthMethod --

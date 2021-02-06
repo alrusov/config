@@ -80,7 +80,14 @@ func TestPopulate(t *testing.T) {
 						"/xxx": {"*": true},
 						"/yyy": {"user1": true, "user2": true, "@group1": true, "@group2": false, "user3": false},
 					},
-					Users: misc.StringMap{"test-user1": "pwd1", "test-user2": "pwd2"},
+					UsersMap: misc.StringMap{"test-user1": "pwd1", "test-user2": "pwd2", "test-user3@   g0  ": "pwd3", "test-user4@g1": "pwd4", "test-user5  @  g1,g2,g3, g5@xxx , @g6@  ": "pwd5"},
+					Users: map[string]User{
+						"test-user1": {Password: "pwd1", Groups: []string{}},
+						"test-user2": {Password: "pwd2", Groups: []string{}},
+						"test-user3": {Password: "pwd3", Groups: []string{"g0"}},
+						"test-user4": {Password: "pwd4", Groups: []string{"g1"}},
+						"test-user5": {Password: "pwd5", Groups: []string{"g1", "g2", "g3", "g5@xxx", "@g6@"}},
+					},
 					Methods: map[string]*AuthMethod{
 						"basic": {
 							Enabled:    true,

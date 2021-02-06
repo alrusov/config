@@ -115,6 +115,39 @@ func (x *Auth) Check(cfg interface{}) (err error) {
 
 	x.Endpoints = authSlice2Map(x.EndpointsSlice)
 
+	x.Users = make(map[string]User, len(x.UsersMap))
+
+	for u, p := range x.UsersMap {
+		u = strings.TrimSpace(u)
+		if u == "" {
+			msgs.Add(`Empty user name`)
+			continue
+		}
+
+		g := strings.SplitN(u, "@", 2)
+		u = strings.TrimSpace(g[0])
+
+		if len(g) == 1 {
+			g = []string{}
+		} else {
+			g = strings.Split(g[1], ",")
+			if len(g) > 0 {
+				for i, n := range g {
+					g[i] = strings.TrimSpace(n)
+					if g[i] == "" {
+						msgs.Add(`Empty group for user "%s"`, u)
+						continue
+					}
+				}
+			}
+		}
+
+		x.Users[u] = User{
+			Password: p,
+			Groups:   g,
+		}
+	}
+
 	for methodName, method := range x.Methods {
 		methodDef, exists := knownAuthMethods[methodName]
 		if !exists {
