@@ -91,11 +91,13 @@ func TestPopulate(t *testing.T) {
 					Methods: map[string]*AuthMethod{
 						"basic": {
 							Enabled:    true,
+							Score:      0,
 							OptionsMap: misc.InterfaceMap{},
 							Options:    &basicOptions{},
 						},
 						"jwt": {
 							Enabled:    true,
+							Score:      20,
 							OptionsMap: misc.InterfaceMap{"secret": "secret-secret", "lifetime": float64(157680000)},
 							Options:    &jwtOptions{Secret: "secret-secret", Lifetime: 157680000},
 						},

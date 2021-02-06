@@ -84,6 +84,7 @@ type (
 	// AuthMethod --
 	AuthMethod struct {
 		Enabled    bool              `toml:"enabled"`
+		Score      int               `toml:"score"`
 		OptionsMap misc.InterfaceMap `toml:"options"`
 		Options    interface{}       `toml:"-"`
 	}

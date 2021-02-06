@@ -26,7 +26,7 @@ listener = { bind-addr = ":1234", ssl-combined-pem = "", timeout = 6, \
 		users = {{#include ^users.toml}}, \
 		methods = { \
 			basic = { enabled = true, options = {} }, \
-			jwt   = { enabled = true, options = { secret = "secret-secret", lifetime = 157680000 } }, \
+			jwt   = { enabled = true, options = { secret = "secret-secret", lifetime = 157680000 }, score = 20 }, \
 		} \
 	} \
 }
