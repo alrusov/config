@@ -218,7 +218,7 @@ func (x *Auth) Check(cfg interface{}) (err error) {
 			}
 		}
 
-		if methodDef.check != nil {
+		if methodDef.check != nil && method.Enabled {
 			err = methodDef.check(method)
 			if err != nil {
 				msgs.Add(`%s: %v`, methodName, err)
