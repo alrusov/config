@@ -1,6 +1,8 @@
 package config
 
 import (
+	"time"
+
 	"github.com/alrusov/misc"
 )
 
@@ -23,15 +25,18 @@ type (
 		LogLevel        string         `toml:"log-level"`  // default
 		LogLevels       misc.StringMap `toml:"log-levels"` // by facilities
 		LogBufferSize   int            `toml:"log-buffer-size"`
-		LogBufferDelay  int            `toml:"log-buffer-delay"`
+		LogBufferDelayS string         `toml:"log-buffer-delay"`
+		LogBufferDelay  time.Duration  `toml:"-"`
 		LogMaxStringLen int            `toml:"log-max-string-len"`
 
 		GoMaxProcs int `toml:"go-max-procs"`
 
-		MemStatsPeriod int    `toml:"mem-stats-period"`
-		MemStatsLevel  string `toml:"mem-stats-level"`
+		MemStatsPeriodS string        `toml:"mem-stats-period"`
+		MemStatsPeriod  time.Duration `toml:"-"`
+		MemStatsLevel   string        `toml:"mem-stats-level"`
 
-		LoadAvgPeriod int `toml:"load-avg-period"`
+		LoadAvgPeriodS string        `toml:"load-avg-period"`
+		LoadAvgPeriod  time.Duration `toml:"-"`
 
 		ProfilerEnabled bool `toml:"profiler-enabled"`
 		DeepProfiling   bool `toml:"deep-profiling"`
@@ -54,7 +59,8 @@ type (
 		SSLCombinedPem string `toml:"ssl-combined-pem"`
 
 		//
-		Timeout int `toml:"timeout"`
+		TimeoutS string        `toml:"timeout"`
+		Timeout  time.Duration `toml:"-"`
 
 		IconFile string `toml:"icon-file"`
 
@@ -91,12 +97,15 @@ type (
 
 	// DB --
 	DB struct {
-		Type    string `toml:"type"`
-		DSN     string `toml:"dsn"`
-		Timeout int    `toml:"timeout"`
-		Retry   int    `toml:"retry"`
+		Type     string        `toml:"type"`
+		DSN      string        `toml:"dsn"`
+		TimeoutS string        `toml:"timeout"`
+		Timeout  time.Duration `toml:"-"`
+		Retry    int           `toml:"retry"`
 	}
 )
+
+//----------------------------------------------------------------------------------------------------------------------------//
 
 const (
 	// AuthMethodBasic --
@@ -107,17 +116,15 @@ const (
 	AuthMethodKrb5 = "krb5"
 )
 
-//----------------------------------------------------------------------------------------------------------------------------//
-
 const (
 	// ListenerDefaultTimeout --
-	ListenerDefaultTimeout = 5
+	ListenerDefaultTimeout = 5 * time.Second
 
 	// ClientDefaultTimeout --
-	ClientDefaultTimeout = 5
+	ClientDefaultTimeout = 5 * time.Second
 
 	// JWTdefaultLifetime --
-	JWTdefaultLifetime = 3600
+	JWTdefaultLifetime = 3600 * time.Second
 )
 
 //----------------------------------------------------------------------------------------------------------------------------//

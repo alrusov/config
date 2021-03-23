@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/alrusov/jsonw"
 	"github.com/alrusov/misc"
@@ -65,7 +66,8 @@ func TestPopulate(t *testing.T) {
 			Listener: Listener{
 				Addr:                   ":1234",
 				SSLCombinedPem:         "",
-				Timeout:                6,
+				TimeoutS:               "6s",
+				Timeout:                6 * time.Second,
 				Root:                   "",
 				ProxyPrefix:            "/config-test",
 				IconFile:               "/tmp/favicon.ico",

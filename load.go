@@ -186,7 +186,7 @@ func LoadFile(fileName string, cfg interface{}) (err error) {
 			}
 			msg.WriteString("<<<")
 
-			log.Message(log.WARNING, "%s", string(msg.Bytes()))
+			log.Message(log.WARNING, "%s", msg.String())
 		}
 	}()
 

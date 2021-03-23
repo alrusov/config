@@ -13,6 +13,21 @@ import (
 func (x *Common) Check(cfg interface{}) (err error) {
 	msgs := misc.NewMessages()
 
+	x.LogBufferDelay, err = misc.Interval2Duration(x.LogBufferDelayS)
+	if err != nil {
+		msgs.Add("common.log-buffer-delay: %s", err)
+	}
+
+	x.MemStatsPeriod, err = misc.Interval2Duration(x.MemStatsPeriodS)
+	if err != nil {
+		msgs.Add("common.mem-stat-period: %s", err)
+	}
+
+	x.LoadAvgPeriod, err = misc.Interval2Duration(x.LoadAvgPeriodS)
+	if err != nil {
+		msgs.Add("common.load-avg-period: %s", err)
+	}
+
 	if x.Name == "" {
 		x.Name = misc.AppName()
 	}
@@ -43,7 +58,7 @@ func (x *Listener) Check(cfg interface{}) (err error) {
 	if x.Root != "" {
 		x.Root, err = misc.AbsPath(x.Root)
 		if err != nil {
-			msgs.Add("Listener.root: %v", err)
+			msgs.Add("listener.root: %s", err)
 		}
 	}
 
@@ -54,8 +69,13 @@ func (x *Listener) Check(cfg interface{}) (err error) {
 	if x.SSLCombinedPem != "" {
 		x.SSLCombinedPem, err = misc.AbsPath(x.SSLCombinedPem)
 		if err != nil {
-			msgs.Add("Listener.ssl-combined-pem: %v", err)
+			msgs.Add("listener.ssl-combined-pem: %s", err)
 		}
+	}
+
+	x.Timeout, err = misc.Interval2Duration(x.TimeoutS)
+	if err != nil {
+		msgs.Add("listener.timeout: %s", err)
 	}
 
 	if x.Timeout <= 0 {
@@ -65,7 +85,7 @@ func (x *Listener) Check(cfg interface{}) (err error) {
 	if x.IconFile != "" {
 		x.IconFile, err = misc.AbsPath(x.IconFile)
 		if err != nil {
-			msgs.Add("Listener.icon-file: %v", err)
+			msgs.Add("listener.icon-file: %s", err)
 		}
 	}
 
@@ -77,7 +97,24 @@ func (x *Listener) Check(cfg interface{}) (err error) {
 
 	err = x.Auth.Check(cfg)
 	if err != nil {
-		msgs.Add("Listener.auth: %v", err)
+		msgs.Add("listener.auth: %s", err)
+	}
+
+	return msgs.Error()
+}
+
+//----------------------------------------------------------------------------------------------------------------------------//
+// Check --
+func (x *DB) Check(cfg interface{}) (err error) {
+	msgs := misc.NewMessages()
+
+	x.Timeout, err = misc.Interval2Duration(x.TimeoutS)
+	if err != nil {
+		msgs.Add("DB.timeout: %s", err)
+	}
+
+	if x.Timeout <= 0 {
+		x.Timeout = ClientDefaultTimeout
 	}
 
 	return msgs.Error()
@@ -125,7 +162,7 @@ func Check(cfg interface{}, list []interface{}) error {
 			continue
 		}
 
-		msgs.Add("%v", err)
+		msgs.Add("%s", err)
 	}
 
 	return msgs.Error()

@@ -157,7 +157,7 @@ func (x *Auth) Check(cfg interface{}) (err error) {
 
 		options, err := cloneStruct(methodDef.pattern)
 		if err != nil {
-			msgs.Add(`%s clone: %v`, methodName, err)
+			msgs.Add(`%s clone: %s`, methodName, err)
 			continue
 		}
 
@@ -213,7 +213,7 @@ func (x *Auth) Check(cfg interface{}) (err error) {
 			}
 
 			if err != nil {
-				msgs.Add(`%s.%s: %v`, methodName, optName, err)
+				msgs.Add(`%s.%s: %s`, methodName, optName, err)
 				continue
 			}
 		}
@@ -221,7 +221,7 @@ func (x *Auth) Check(cfg interface{}) (err error) {
 		if methodDef.check != nil && method.Enabled {
 			err = methodDef.check(method)
 			if err != nil {
-				msgs.Add(`%s: %v`, methodName, err)
+				msgs.Add(`%s: %s`, methodName, err)
 				continue
 			}
 		}

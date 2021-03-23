@@ -16,7 +16,7 @@ param-last = { \
 }
 
 [http]
-listener = { bind-addr = ":1234", ssl-combined-pem = "", timeout = 6, \
+listener = { bind-addr = ":1234", ssl-combined-pem = "", timeout = "6s", \
 	root = "", \
 	proxy-prefix = "/config-test/", \
 	icon-file = "/tmp/favicon.ico", \
