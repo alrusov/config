@@ -1,7 +1,7 @@
 github.com/alrusov/jsonw v0.1.1 h1:fApyxCLUXpMxCLGw7S4vCBmfXWALuX+eU4lGxmxWXMs=
 github.com/alrusov/jsonw v0.1.1/go.mod h1:hnRfKPT1dIS8+ez4H0QJbXSwvWdVJYq835ZS3LQGLfI=
-github.com/alrusov/log v0.1.28 h1:OiLUrys2Cih/Zfll2Njw1GhDKGWYLC70PLkh1TcxwC0=
-github.com/alrusov/log v0.1.28/go.mod h1:NH2/TIE01QwvWMexz21JCgsJW6CMSgsMG200fLLGZ6o=
+github.com/alrusov/log v0.1.29 h1:3ZuZg6hgKWscAAFnD80v1Jxjbaf3ZljjZoSmhWxI1FY=
+github.com/alrusov/log v0.1.29/go.mod h1:1ZPlPxFPo2OTSsmQpOw5E+kuMzLWvR+7nRrtKmmw0V4=
 github.com/alrusov/misc v0.1.34/go.mod h1:wq7jkLgy8u0ogF2EyY1Goes9GftiRcK4w1wH1vM9JFc=
 github.com/alrusov/misc v0.1.38 h1:RBHxG7mWjSWzPPcyAnntD0G03OUCMdEQJruDMHsZNcU=
 github.com/alrusov/misc v0.1.38/go.mod h1:9n/TPhEOs7n3zEKP8R/TK0TIOJGISHOJe5KwKqsCsgg=
