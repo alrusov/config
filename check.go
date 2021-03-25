@@ -108,15 +108,6 @@ func (x *Listener) Check(cfg interface{}) (err error) {
 func (x *DB) Check(cfg interface{}) (err error) {
 	msgs := misc.NewMessages()
 
-	x.Timeout, err = misc.Interval2Duration(x.TimeoutS)
-	if err != nil {
-		msgs.Add("DB.timeout: %s", err)
-	}
-
-	if x.Timeout <= 0 {
-		x.Timeout = ClientDefaultTimeout
-	}
-
 	return msgs.Error()
 }
 

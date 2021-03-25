@@ -99,8 +99,6 @@ type (
 	DB struct {
 		Type          string        `toml:"type"`
 		DSN           string        `toml:"dsn"`
-		TimeoutS      string        `toml:"timeout"`
-		Timeout       time.Duration `toml:"-"`
 		MaxConnection int           `toml:"max-conn"`
 		Retry         int           `toml:"retry"`
 	}
