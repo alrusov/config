@@ -1,10 +1,11 @@
 github.com/alrusov/jsonw v0.1.1 h1:fApyxCLUXpMxCLGw7S4vCBmfXWALuX+eU4lGxmxWXMs=
 github.com/alrusov/jsonw v0.1.1/go.mod h1:hnRfKPT1dIS8+ez4H0QJbXSwvWdVJYq835ZS3LQGLfI=
-github.com/alrusov/log v0.1.29 h1:3ZuZg6hgKWscAAFnD80v1Jxjbaf3ZljjZoSmhWxI1FY=
-github.com/alrusov/log v0.1.29/go.mod h1:1ZPlPxFPo2OTSsmQpOw5E+kuMzLWvR+7nRrtKmmw0V4=
+github.com/alrusov/log v0.1.30 h1:TEJ0tbPSWgKF4GYygzYpIAbjOZdXlInKgjOydb1C6Bs=
+github.com/alrusov/log v0.1.30/go.mod h1:SPRqeXCHwCnFs+qE85d576Lrkeyf1FbwdY1Fkt4UpZE=
 github.com/alrusov/misc v0.1.34/go.mod h1:wq7jkLgy8u0ogF2EyY1Goes9GftiRcK4w1wH1vM9JFc=
-github.com/alrusov/misc v0.1.38 h1:RBHxG7mWjSWzPPcyAnntD0G03OUCMdEQJruDMHsZNcU=
-github.com/alrusov/misc v0.1.38/go.mod h1:9n/TPhEOs7n3zEKP8R/TK0TIOJGISHOJe5KwKqsCsgg=
+github.com/alrusov/misc v0.1.39/go.mod h1:9n/TPhEOs7n3zEKP8R/TK0TIOJGISHOJe5KwKqsCsgg=
+github.com/alrusov/misc v0.1.45 h1:A9f5SuWlmgjNEw3pNh3k98fS59wSnGsxGODnCHkGcro=
+github.com/alrusov/misc v0.1.45/go.mod h1:9n/TPhEOs7n3zEKP8R/TK0TIOJGISHOJe5KwKqsCsgg=
 github.com/alrusov/panic v0.1.13 h1:deY9lE2bUwSS1Py4eg97oRk9d+mrOZmMowKB1hPQBrs=
 github.com/alrusov/panic v0.1.13/go.mod h1:zwS3WCJcw2e8x/A0d1UR7GQeZsoQ+OQ7Cf5x5UQSel8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

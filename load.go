@@ -213,7 +213,7 @@ func LoadFile(fileName string, cfg interface{}) (err error) {
 			for i := 0; i < fCnt; i++ {
 				f, ok := c.Field(i).Addr().Interface().(*Common)
 				if ok {
-					commonConfig = f
+					SetCommon(f)
 					break
 				}
 			}
@@ -231,6 +231,11 @@ func GetConfig() interface{} {
 }
 
 //----------------------------------------------------------------------------------------------------------------------------//
+
+// SetCommon --
+func SetCommon(cc *Common) {
+	commonConfig = cc
+}
 
 // GetCommon --
 func GetCommon() *Common {
