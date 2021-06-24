@@ -43,7 +43,9 @@ type (
 
 		UseStdJSON bool `toml:"use-std-json"`
 
-		MinSizeForGzip int `toml:"min-size-for-gzip"`
+		// Default values for stdhttp callers
+		SkipTLSVerification bool `toml:"skip-tls-verification"`
+		MinSizeForGzip      int  `toml:"min-size-for-gzip"`
 	}
 
 	// Listener --
@@ -97,10 +99,10 @@ type (
 
 	// DB --
 	DB struct {
-		Type          string        `toml:"type"`
-		DSN           string        `toml:"dsn"`
-		MaxConnection int           `toml:"max-conn"`
-		Retry         int           `toml:"retry"`
+		Type          string `toml:"type"`
+		DSN           string `toml:"dsn"`
+		MaxConnection int    `toml:"max-conn"`
+		Retry         int    `toml:"retry"`
 	}
 )
 

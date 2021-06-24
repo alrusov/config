@@ -4,21 +4,28 @@
 *.dll
 *.so
 *.dylib
-__debug_bin
-
-# vim swp file
-*.swp
 
 # Test binary, build with `go test -c`
 *.test
+*.test.exe
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
-# custom
+*.tmp
+*.log
+
 _extra/
 logs/
+*.log
+error_log/
 
 TODO
+LAST_BUILD
+Makefile.private
+
+debug
+debug.test
+__debug_bin
 
 *.dump
