@@ -3,6 +3,7 @@ package config
 import (
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/alrusov/misc"
 )
@@ -33,7 +34,7 @@ func (x *Common) Check(cfg interface{}) (err error) {
 	}
 
 	if x.LoadAvgPeriod <= 0 {
-		x.LoadAvgPeriod = 60
+		x.LoadAvgPeriod = 60 * time.Second
 	}
 
 	return msgs.Error()

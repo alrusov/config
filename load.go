@@ -64,7 +64,7 @@ func readFile(name string, base string) ([]byte, string, error) {
 		return nil, name, err
 	}
 	if int64(dSize) != fSize {
-		return nil, name, fmt.Errorf("File read error - got %d bytes, expected %d", dSize, fSize)
+		return nil, name, fmt.Errorf("file read error - got %d bytes, expected %d", dSize, fSize)
 	}
 
 	data = bytes.TrimSpace(reComment.ReplaceAll(data, []byte{}))
@@ -101,50 +101,48 @@ func populate(data []byte, base string, lineNumber *uint) (newData *bytes.Buffer
 		*lineNumber++
 
 		findResult := rePreprocessor.FindAllSubmatch(line, -1)
-		if findResult != nil {
-			for _, matches := range findResult {
-				switch string(matches[1]) {
-				case "$":
-					name := string(matches[2])
-					v, exists := env[name]
-					if !exists {
-						withWarn = true
-						log.Message(log.WARNING, `Undefined environment variable "%s" in line %d, using empty value`, name, *lineNumber)
-						v = []byte("")
-					}
-					line = bytes.Replace(line, matches[0], v, -1)
-				case "#":
-					s := string(matches[2])
-					if strings.HasPrefix(s, "include ") {
-						p := strings.Split(s, " ")
-						if len(p) != 2 {
-							msgs.Add(fmt.Sprintf(`Illegal preprocessor command "%s" in line %d`, string(matches[2]), *lineNumber))
-							continue
-						}
-
-						var err error
-						repl, fn, err := readFile(p[1], base)
-						if err != nil {
-							msgs.Add(fmt.Sprintf(`Include error "%s" in line %d`, err.Error(), *lineNumber))
-							continue
-						}
-
-						*lineNumber--
-						b, w, err := populate(repl, filepath.Dir(fn), lineNumber)
-						if w {
-							withWarn = true
-						}
-						if err != nil {
-							msgs.Add(fmt.Sprintf(`Include error "%s" in line %d`, err.Error(), *lineNumber))
-							continue
-						}
-
-						line = bytes.Replace(line, matches[0], bytes.TrimSpace(b.Bytes()), -1)
+		for _, matches := range findResult {
+			switch string(matches[1]) {
+			case "$":
+				name := string(matches[2])
+				v, exists := env[name]
+				if !exists {
+					withWarn = true
+					log.Message(log.WARNING, `Undefined environment variable "%s" in line %d, using empty value`, name, *lineNumber)
+					v = []byte("")
+				}
+				line = bytes.Replace(line, matches[0], v, -1)
+			case "#":
+				s := string(matches[2])
+				if strings.HasPrefix(s, "include ") {
+					p := strings.Split(s, " ")
+					if len(p) != 2 {
+						msgs.Add(fmt.Sprintf(`Illegal preprocessor command "%s" in line %d`, string(matches[2]), *lineNumber))
 						continue
 					}
 
-					msgs.Add(fmt.Sprintf(`Unknown preprocessor command "%s" in line %d`, string(matches[2]), *lineNumber))
+					var err error
+					repl, fn, err := readFile(p[1], base)
+					if err != nil {
+						msgs.Add(fmt.Sprintf(`Include error "%s" in line %d`, err.Error(), *lineNumber))
+						continue
+					}
+
+					*lineNumber--
+					b, w, err := populate(repl, filepath.Dir(fn), lineNumber)
+					if w {
+						withWarn = true
+					}
+					if err != nil {
+						msgs.Add(fmt.Sprintf(`Include error "%s" in line %d`, err.Error(), *lineNumber))
+						continue
+					}
+
+					line = bytes.Replace(line, matches[0], bytes.TrimSpace(b.Bytes()), -1)
+					continue
 				}
+
+				msgs.Add(fmt.Sprintf(`Unknown preprocessor command "%s" in line %d`, string(matches[2]), *lineNumber))
 			}
 		}
 

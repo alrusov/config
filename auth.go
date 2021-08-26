@@ -34,7 +34,7 @@ type (
 func AddAuthMethod(name string, options interface{}, checkConfig AuthMethodCheck) (err error) {
 	_, exists := knownAuthMethods[name]
 	if exists {
-		err = fmt.Errorf(`Method "%s" is already defined`, name)
+		err = fmt.Errorf(`method "%s" is already defined`, name)
 		return
 	}
 
@@ -209,7 +209,7 @@ func (x *Auth) Check(cfg interface{}) (err error) {
 					f.SetString(vv)
 				}
 			default:
-				err = fmt.Errorf(`Illegal kind "%s"`, optDef.kind.String())
+				err = fmt.Errorf(`illegal kind "%s"`, optDef.kind.String())
 			}
 
 			if err != nil {
