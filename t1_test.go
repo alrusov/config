@@ -48,6 +48,8 @@ func TestPopulate(t *testing.T) {
 		HTTP  http              `toml:"http"`
 	}
 
+	iconFile, _ := misc.AbsPath("/tmp/favicon.ico") // workaround for idiotic windows
+
 	expected := cfg{
 		P0: "***",
 		P1: "VAL1",
@@ -70,7 +72,7 @@ func TestPopulate(t *testing.T) {
 				Timeout:                6 * time.Second,
 				Root:                   "",
 				ProxyPrefix:            "/config-test",
-				IconFile:               "/tmp/favicon.ico",
+				IconFile:               iconFile,
 				DisabledEndpointsSlice: []string{"/aaa*", "!/aaa/bbb"},
 				DisabledEndpoints:      misc.BoolMap{"/aaa*": true, "!/aaa/bbb": true},
 				Auth: Auth{
