@@ -25,18 +25,15 @@ type (
 		LogLevel        string         `toml:"log-level"`  // default
 		LogLevels       misc.StringMap `toml:"log-levels"` // by facilities
 		LogBufferSize   int            `toml:"log-buffer-size"`
-		LogBufferDelayS string         `toml:"log-buffer-delay"`
-		LogBufferDelay  time.Duration  `toml:"-"`
+		LogBufferDelay  Duration       `toml:"log-buffer-delay"`
 		LogMaxStringLen int            `toml:"log-max-string-len"`
 
 		GoMaxProcs int `toml:"go-max-procs"`
 
-		MemStatsPeriodS string        `toml:"mem-stats-period"`
-		MemStatsPeriod  time.Duration `toml:"-"`
-		MemStatsLevel   string        `toml:"mem-stats-level"`
+		MemStatsPeriod Duration `toml:"mem-stats-period"`
+		MemStatsLevel  string   `toml:"mem-stats-level"`
 
-		LoadAvgPeriodS string        `toml:"load-avg-period"`
-		LoadAvgPeriod  time.Duration `toml:"-"`
+		LoadAvgPeriod Duration `toml:"load-avg-period"`
 
 		ProfilerEnabled bool `toml:"profiler-enabled"`
 		DeepProfiling   bool `toml:"deep-profiling"`
@@ -61,8 +58,7 @@ type (
 		SSLCombinedPem string `toml:"ssl-combined-pem"`
 
 		//
-		TimeoutS string        `toml:"timeout"`
-		Timeout  time.Duration `toml:"-"`
+		Timeout Duration `toml:"timeout"`
 
 		IconFile string `toml:"icon-file"`
 
@@ -119,13 +115,13 @@ const (
 
 const (
 	// ListenerDefaultTimeout --
-	ListenerDefaultTimeout = 5 * time.Second
+	ListenerDefaultTimeout = Duration(5 * time.Second)
 
 	// ClientDefaultTimeout --
-	ClientDefaultTimeout = 5 * time.Second
+	ClientDefaultTimeout = Duration(5 * time.Second)
 
 	// JWTdefaultLifetime --
-	JWTdefaultLifetime = 3600 * time.Second
+	JWTdefaultLifetime = Duration(3600 * time.Second)
 )
 
 //----------------------------------------------------------------------------------------------------------------------------//

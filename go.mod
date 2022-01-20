@@ -4,13 +4,13 @@ go 1.17
 
 require (
 	github.com/alrusov/jsonw v0.1.1
-	github.com/alrusov/log v0.1.30
-	github.com/alrusov/misc v0.1.46
+	github.com/alrusov/log v0.1.31
+	github.com/alrusov/misc v0.1.49
 	github.com/naoina/toml v0.1.1
 )
 
 require (
-	github.com/alrusov/panic v0.1.13 // indirect
+	github.com/alrusov/panic v0.1.14 // indirect
 	github.com/json-iterator/go v1.1.10 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421 // indirect

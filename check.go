@@ -14,27 +14,12 @@ import (
 func (x *Common) Check(cfg interface{}) (err error) {
 	msgs := misc.NewMessages()
 
-	x.LogBufferDelay, err = misc.Interval2Duration(x.LogBufferDelayS)
-	if err != nil {
-		msgs.Add("common.log-buffer-delay: %s", err)
-	}
-
-	x.MemStatsPeriod, err = misc.Interval2Duration(x.MemStatsPeriodS)
-	if err != nil {
-		msgs.Add("common.mem-stat-period: %s", err)
-	}
-
-	x.LoadAvgPeriod, err = misc.Interval2Duration(x.LoadAvgPeriodS)
-	if err != nil {
-		msgs.Add("common.load-avg-period: %s", err)
-	}
-
 	if x.Name == "" {
 		x.Name = misc.AppName()
 	}
 
 	if x.LoadAvgPeriod <= 0 {
-		x.LoadAvgPeriod = 60 * time.Second
+		x.LoadAvgPeriod = Duration(60 * time.Second)
 	}
 
 	return msgs.Error()
@@ -72,11 +57,6 @@ func (x *Listener) Check(cfg interface{}) (err error) {
 		if err != nil {
 			msgs.Add("listener.ssl-combined-pem: %s", err)
 		}
-	}
-
-	x.Timeout, err = misc.Interval2Duration(x.TimeoutS)
-	if err != nil {
-		msgs.Add("listener.timeout: %s", err)
 	}
 
 	if x.Timeout <= 0 {

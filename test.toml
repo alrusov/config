@@ -10,6 +10,12 @@ param-2 = {$ENV2}
 {#include ^test_include.toml}
 
 
+duration1 = "100ns"
+duration2 = "5d"
+duration3 = "10us"
+duration4 = "10u"
+
+
 param-last = { \
   "x" = 1,     \
   "y" = "Y",   \

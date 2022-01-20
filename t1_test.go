@@ -38,14 +38,18 @@ func TestPopulate(t *testing.T) {
 	}
 
 	type cfg struct {
-		P0    string            `toml:"param-0"`
-		P1    string            `toml:"param-1"`
-		P2    int               `toml:"param-2"`
-		P3    string            `toml:"param-3"`
-		P4    int               `toml:"param-4"`
-		P5    misc.InterfaceMap `toml:"param-5"`
-		Plast s1                `toml:"param-last"`
-		HTTP  http              `toml:"http"`
+		P0        string            `toml:"param-0"`
+		P1        string            `toml:"param-1"`
+		P2        int               `toml:"param-2"`
+		P3        string            `toml:"param-3"`
+		P4        int               `toml:"param-4"`
+		P5        misc.InterfaceMap `toml:"param-5"`
+		Duration1 Duration          `toml:"duration1"`
+		Duration2 Duration          `toml:"duration2"`
+		Duration3 Duration          `toml:"duration3"`
+		Duration4 Duration          `toml:"duration4"`
+		Plast     s1                `toml:"param-last"`
+		HTTP      http              `toml:"http"`
 	}
 
 	iconFile, _ := misc.AbsPath("/tmp/favicon.ico") // workaround for idiotic windows
@@ -60,6 +64,10 @@ func TestPopulate(t *testing.T) {
 			"field1": "val1",
 			"field2": 777,
 		},
+		Duration1: 100 * Duration(time.Nanosecond),
+		Duration2: 5 * Duration(time.Hour*24),
+		Duration3: 10 * Duration(time.Microsecond),
+		Duration4: 10 * Duration(time.Microsecond),
 		Plast: s1{
 			X: 1,
 			Y: "Y",
@@ -68,8 +76,7 @@ func TestPopulate(t *testing.T) {
 			Listener: Listener{
 				Addr:                   ":1234",
 				SSLCombinedPem:         "",
-				TimeoutS:               "6s",
-				Timeout:                6 * time.Second,
+				Timeout:                Duration(6 * time.Second),
 				Root:                   "",
 				ProxyPrefix:            "/config-test",
 				IconFile:               iconFile,
