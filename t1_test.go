@@ -2,7 +2,6 @@ package config
 
 import (
 	"bytes"
-	"reflect"
 	"testing"
 	"time"
 
@@ -12,6 +11,46 @@ import (
 
 //----------------------------------------------------------------------------------------------------------------------------//
 
+type testS1 struct {
+	X int    `toml:"x"`
+	Y string `toml:"y"`
+}
+
+type testHTTP struct {
+	Listener Listener `toml:"listener"`
+}
+
+type testBasicOptions struct {
+}
+
+type testJwtOptions struct {
+	Secret   string `toml:"secret"`
+	Lifetime int    `toml:"lifetime"`
+}
+
+type testCfg struct {
+	P0        string            `toml:"param-0"`
+	P1        string            `toml:"param-1"`
+	P2        int               `toml:"param-2"`
+	P3        string            `toml:"param-3"`
+	P4        int               `toml:"param-4"`
+	P5        misc.InterfaceMap `toml:"param-5"`
+	Duration1 Duration          `toml:"duration1"`
+	Duration2 Duration          `toml:"duration2"`
+	Duration3 Duration          `toml:"duration3"`
+	Duration4 Duration          `toml:"duration4"`
+	Plast     testS1            `toml:"param-last"`
+	HTTP      testHTTP          `toml:"http"`
+}
+
+func (options *testBasicOptions) Check(cfg interface{}) (err error) {
+	return
+}
+
+func (options *testJwtOptions) Check(cfg interface{}) (err error) {
+	return
+}
+
 func TestPopulate(t *testing.T) {
 	fEnv = func() []string {
 		return []string{
@@ -20,41 +59,9 @@ func TestPopulate(t *testing.T) {
 		}
 	}
 
-	type s1 struct {
-		X int    `toml:"x"`
-		Y string `toml:"y"`
-	}
-
-	type http struct {
-		Listener Listener `toml:"listener"`
-	}
-
-	type basicOptions struct {
-	}
-
-	type jwtOptions struct {
-		Secret   string `toml:"secret"`
-		Lifetime int    `toml:"lifetime"`
-	}
-
-	type cfg struct {
-		P0        string            `toml:"param-0"`
-		P1        string            `toml:"param-1"`
-		P2        int               `toml:"param-2"`
-		P3        string            `toml:"param-3"`
-		P4        int               `toml:"param-4"`
-		P5        misc.InterfaceMap `toml:"param-5"`
-		Duration1 Duration          `toml:"duration1"`
-		Duration2 Duration          `toml:"duration2"`
-		Duration3 Duration          `toml:"duration3"`
-		Duration4 Duration          `toml:"duration4"`
-		Plast     s1                `toml:"param-last"`
-		HTTP      http              `toml:"http"`
-	}
-
 	iconFile, _ := misc.AbsPath("/tmp/favicon.ico") // workaround for idiotic windows
 
-	expected := cfg{
+	expected := testCfg{
 		P0: "***",
 		P1: "VAL1",
 		P2: 666,
@@ -68,11 +75,11 @@ func TestPopulate(t *testing.T) {
 		Duration2: 5 * Duration(time.Hour*24),
 		Duration3: 10 * Duration(time.Microsecond),
 		Duration4: 10 * Duration(time.Microsecond),
-		Plast: s1{
+		Plast: testS1{
 			X: 1,
 			Y: "Y",
 		},
-		HTTP: http{
+		HTTP: testHTTP{
 			Listener: Listener{
 				Addr:                   ":1234",
 				SSLCombinedPem:         "",
@@ -101,16 +108,14 @@ func TestPopulate(t *testing.T) {
 					},
 					Methods: map[string]*AuthMethod{
 						"basic": {
-							Enabled:    true,
-							Score:      0,
-							OptionsMap: misc.InterfaceMap{},
-							Options:    &basicOptions{},
+							Enabled: true,
+							Score:   0,
+							Options: &testBasicOptions{},
 						},
 						"jwt": {
-							Enabled:    true,
-							Score:      20,
-							OptionsMap: misc.InterfaceMap{"secret": "secret-secret", "lifetime": float64(157680000)},
-							Options:    &jwtOptions{Secret: "secret-secret", Lifetime: 157680000},
+							Enabled: true,
+							Score:   20,
+							Options: &testJwtOptions{Secret: "secret-secret", Lifetime: 157680000},
 						},
 					},
 				},
@@ -118,19 +123,19 @@ func TestPopulate(t *testing.T) {
 		},
 	}
 
-	var loaded cfg
+	var loaded testCfg
 	err := LoadFile("^test.toml", &loaded)
 	if err != nil {
 		t.Errorf(err.Error())
 		return
 	}
 
-	err = AddAuthMethod("basic", &basicOptions{}, nil)
+	err = AddAuthMethod("basic", &testBasicOptions{})
 	if err != nil {
 		t.Error(err)
 	}
 
-	err = AddAuthMethod("jwt", &jwtOptions{}, nil)
+	err = AddAuthMethod("jwt", &testJwtOptions{})
 	if err != nil {
 		t.Error(err)
 	}
@@ -167,53 +172,26 @@ func TestPopulate(t *testing.T) {
 //----------------------------------------------------------------------------------------------------------------------------//
 
 func TestAddMethod(t *testing.T) {
-	type cfg struct {
-		Field1 int     `toml:"field1" mandatory:"true"`
-		Field2 int64   `toml:"field2" mandatory:"false"`
-		Field3 uint    `toml:"field3" mandatory:"true"`
-		Field4 uint64  `toml:"field4"`
-		Field5 string  `toml:"field5"`
-		Field6 float32 `toml:"field6"`
-		Field7 float64 `toml:"field7"`
-		Field8 bool    `toml:"field8"`
-		//Field9 misc.BoolMap
-	}
-
-	err := AddAuthMethod("test", &cfg{},
-		func(cfg *AuthMethod) (err error) {
-			return
-		},
-	)
+	err := AddAuthMethod("test", &testOptions{})
 	if err != nil {
 		t.Error(err)
 	}
 }
 
-//----------------------------------------------------------------------------------------------------------------------------//
+type testOptions struct {
+	Field1 int     `toml:"field1" mandatory:"true"`
+	Field2 int64   `toml:"field2" mandatory:"false"`
+	Field3 uint    `toml:"field3" mandatory:"true"`
+	Field4 uint64  `toml:"field4"`
+	Field5 string  `toml:"field5"`
+	Field6 float32 `toml:"field6"`
+	Field7 float64 `toml:"field7"`
+	Field8 bool    `toml:"field8"`
+	//Field9 misc.BoolMap
+}
 
-func TestCloneStruct(t *testing.T) {
-	type data struct {
-		Field1 int     `toml:"field1" mandatory:"true"`
-		Field2 int64   `toml:"field2" mandatory:"false"`
-		Field3 uint    `toml:"field3" mandatory:"true"`
-		Field4 uint64  `toml:"field4"`
-		Field5 string  `toml:"field5"`
-		Field6 float32 `toml:"field6"`
-		Field7 float64 `toml:"field7"`
-		Field8 bool    `toml:"field8"`
-	}
-	src := &data{1, 2, 3, 4, "qwerty", 1.1, 2.2, true}
-
-	dstV, err := cloneStruct(src)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	dst := dstV.Interface()
-
-	if !reflect.DeepEqual(src, dst) {
-		t.Fatalf("src=%#v\nnot equal\ndst=%#v", src, dst)
-	}
+func (options *testOptions) Check(cfg interface{}) (err error) {
+	return
 }
 
 //----------------------------------------------------------------------------------------------------------------------------//
