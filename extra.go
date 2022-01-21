@@ -36,7 +36,7 @@ func ConvExtra(src *interface{}, obj interface{}) (err error) {
 
 	srcTp := reflect.ValueOf(*src).Type()
 	if srcTp != imapTp {
-		return fmt.Errorf(`src is "%T", "%T" expected`, srcTp, imapTp)
+		return fmt.Errorf(`src is "%s", "%s" expected`, srcTp, imapTp)
 	}
 
 	buf := new(bytes.Buffer)
@@ -55,7 +55,7 @@ func ConvExtra(src *interface{}, obj interface{}) (err error) {
 
 	newObjTp := reflect.ValueOf(obj).Type()
 	if newObjTp != objTp {
-		return fmt.Errorf(`converted data is "%T", "%T" expected`, newObjTp, objTp)
+		return fmt.Errorf(`converted data is "%s", "%s" expected`, newObjTp, objTp)
 	}
 
 	*src = obj

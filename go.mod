@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/alrusov/jsonw v0.1.1
 	github.com/alrusov/log v0.1.31
-	github.com/alrusov/misc v0.1.49
+	github.com/alrusov/misc v0.1.50
 	github.com/naoina/toml v0.1.1
 )
 
