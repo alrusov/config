@@ -89,7 +89,7 @@ type (
 	AuthMethod struct {
 		Enabled    bool              `toml:"enabled"`
 		Score      int               `toml:"score"`
-		Options    interface{}       `toml:"options"`
+		Options    any       `toml:"options"`
 	}
 
 	// DB --

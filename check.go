@@ -11,7 +11,7 @@ import (
 //----------------------------------------------------------------------------------------------------------------------------//
 
 // Check --
-func (x *Common) Check(cfg interface{}) (err error) {
+func (x *Common) Check(cfg any) (err error) {
 	msgs := misc.NewMessages()
 
 	if x.Name == "" {
@@ -28,7 +28,7 @@ func (x *Common) Check(cfg interface{}) (err error) {
 //----------------------------------------------------------------------------------------------------------------------------//
 
 // Check --
-func (x *Listener) Check(cfg interface{}) (err error) {
+func (x *Listener) Check(cfg any) (err error) {
 	msgs := misc.NewMessages()
 
 	x.Addr = strings.TrimSpace(x.Addr)
@@ -86,7 +86,7 @@ func (x *Listener) Check(cfg interface{}) (err error) {
 
 //----------------------------------------------------------------------------------------------------------------------------//
 // Check --
-func (x *DB) Check(cfg interface{}) (err error) {
+func (x *DB) Check(cfg any) (err error) {
 	msgs := misc.NewMessages()
 
 	return msgs.Error()
@@ -95,7 +95,7 @@ func (x *DB) Check(cfg interface{}) (err error) {
 //----------------------------------------------------------------------------------------------------------------------------//
 
 // Check --
-func Check(cfg interface{}, list []interface{}) error {
+func Check(cfg any, list []any) error {
 	msgs := misc.NewMessages()
 
 	for _, x := range list {
@@ -109,14 +109,14 @@ func Check(cfg interface{}, list []interface{}) error {
 		m := v.MethodByName("Check")
 
 		if m.Kind() != reflect.Func {
-			msgs.Add(`"%#v" doesn't have the "Check" method`, x)
+			msgs.Add(`"%#v" doesn't have the Check function`, x)
 			continue
 		}
 
 		e := m.Call([]reflect.Value{reflect.ValueOf(cfg)})
 
 		if len(e) != 1 || e[0].Kind() != reflect.Interface {
-			msgs.Add(`"%#v" method "Check" returned illegal value`, x)
+			msgs.Add(`"%#v" Check function returned an illegal value`, x)
 			continue
 		}
 
@@ -126,7 +126,7 @@ func Check(cfg interface{}, list []interface{}) error {
 
 		err, ok := e[0].Interface().(error)
 		if !ok {
-			msgs.Add(`"%#v" method "Check" returned not error value`, x)
+			msgs.Add(`"%#v" Check function returned not error type value`, x)
 			continue
 		}
 

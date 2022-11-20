@@ -43,11 +43,11 @@ type testCfg struct {
 	HTTP      testHTTP          `toml:"http"`
 }
 
-func (options *testBasicOptions) Check(cfg interface{}) (err error) {
+func (options *testBasicOptions) Check(cfg any) (err error) {
 	return
 }
 
-func (options *testJwtOptions) Check(cfg interface{}) (err error) {
+func (options *testJwtOptions) Check(cfg any) (err error) {
 	return
 }
 
@@ -142,7 +142,7 @@ func TestPopulate(t *testing.T) {
 
 	err = Check(
 		loaded,
-		[]interface{}{
+		[]any{
 			&loaded.HTTP.Listener,
 		},
 	)
@@ -190,7 +190,7 @@ type testOptions struct {
 	//Field9 misc.BoolMap
 }
 
-func (options *testOptions) Check(cfg interface{}) (err error) {
+func (options *testOptions) Check(cfg any) (err error) {
 	return
 }
 

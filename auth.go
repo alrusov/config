@@ -14,7 +14,7 @@ var knownAuthMethods = map[string]*authMethod{}
 
 type (
 	authMethod struct {
-		options interface{}
+		options any
 		check   reflect.Value
 	}
 )
@@ -22,7 +22,7 @@ type (
 //----------------------------------------------------------------------------------------------------------------------------//
 
 // AddAuthMethod --
-func AddAuthMethod(name string, options interface{}) (err error) {
+func AddAuthMethod(name string, options any) (err error) {
 	_, exists := knownAuthMethods[name]
 	if exists {
 		return fmt.Errorf(`method "%s" is already defined`, name)
@@ -62,7 +62,7 @@ func AddAuthMethod(name string, options interface{}) (err error) {
 //----------------------------------------------------------------------------------------------------------------------------//
 
 // Check --
-func (x *Auth) Check(cfg interface{}) (err error) {
+func (x *Auth) Check(cfg any) (err error) {
 	msgs := misc.NewMessages()
 
 	x.Endpoints = authSlice2Map(x.EndpointsSlice)

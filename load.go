@@ -19,7 +19,7 @@ import (
 
 var (
 	configText   = ""
-	fullConfig   = interface{}(nil)
+	fullConfig   = any(nil)
 	commonConfig = (*Common)(nil)
 
 	rePreprocessor = regexp.MustCompile(`(?:\{)([\$#])([^\}]+)(?:\})`)
@@ -160,7 +160,7 @@ func populate(data []byte, base string, lineNumber *uint) (newData *bytes.Buffer
 //----------------------------------------------------------------------------------------------------------------------------//
 
 // LoadFile parses the specified file into a Config object
-func LoadFile(fileName string, cfg interface{}) (err error) {
+func LoadFile(fileName string, cfg any) (err error) {
 	if len(env) == 0 {
 		loadEnv()
 	}
@@ -224,7 +224,7 @@ func LoadFile(fileName string, cfg interface{}) (err error) {
 //----------------------------------------------------------------------------------------------------------------------------//
 
 // GetConfig --
-func GetConfig() interface{} {
+func GetConfig() any {
 	return fullConfig
 }
 

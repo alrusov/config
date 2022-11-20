@@ -11,12 +11,12 @@ import (
 //----------------------------------------------------------------------------------------------------------------------------//
 
 var (
-	imapTp = reflect.ValueOf(map[string]interface{}{}).Type()
+	imapTp = reflect.ValueOf(map[string]any{}).Type()
 )
 
 //----------------------------------------------------------------------------------------------------------------------------//
 
-func ConvExtra(src *interface{}, obj interface{}) (err error) {
+func ConvExtra(src *any, obj any) (err error) {
 	if src == nil {
 		return fmt.Errorf(`src is nil`)
 	}
@@ -36,7 +36,7 @@ func ConvExtra(src *interface{}, obj interface{}) (err error) {
 
 	srcTp := reflect.ValueOf(*src).Type()
 	if srcTp != imapTp {
-		return fmt.Errorf(`src is "%s", "%s" expected`, srcTp, imapTp)
+		return fmt.Errorf(`src is "%s", expected "%s"`, srcTp, imapTp)
 	}
 
 	buf := new(bytes.Buffer)
@@ -55,7 +55,7 @@ func ConvExtra(src *interface{}, obj interface{}) (err error) {
 
 	newObjTp := reflect.ValueOf(obj).Type()
 	if newObjTp != objTp {
-		return fmt.Errorf(`converted data is "%s", "%s" expected`, newObjTp, objTp)
+		return fmt.Errorf(`converted data is "%s", expected "%s"`, newObjTp, objTp)
 	}
 
 	*src = obj
