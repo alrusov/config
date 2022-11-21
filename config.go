@@ -43,6 +43,8 @@ type (
 		// Default values for stdhttp callers
 		SkipTLSVerification bool `toml:"skip-tls-verification"`
 		MinSizeForGzip      int  `toml:"min-size-for-gzip"`
+
+		MaxWorkersCount int `toml:"max-workers-count"`
 	}
 
 	// Listener --
@@ -87,9 +89,9 @@ type (
 
 	// AuthMethod --
 	AuthMethod struct {
-		Enabled    bool              `toml:"enabled"`
-		Score      int               `toml:"score"`
-		Options    any       `toml:"options"`
+		Enabled bool `toml:"enabled"`
+		Score   int  `toml:"score"`
+		Options any  `toml:"options"`
 	}
 
 	// DB --
