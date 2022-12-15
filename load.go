@@ -7,7 +7,9 @@ import (
 	"path/filepath"
 	"reflect"
 	"regexp"
+	"strconv"
 	"strings"
+	"syscall"
 
 	"github.com/naoina/toml"
 
@@ -31,7 +33,7 @@ var (
 	reMultiLine = regexp.MustCompile(`(?m)\s*\\\s*\r?\n\s*`)
 
 	fEnv = os.Environ
-	env  = make(map[string][]byte)
+	env  = map[string][]byte{}
 )
 
 //----------------------------------------------------------------------------------------------------------------------------//
@@ -100,55 +102,69 @@ func populate(data []byte, base string, lineNumber *uint) (newData *bytes.Buffer
 
 		*lineNumber++
 
-		findResult := rePreprocessor.FindAllSubmatch(line, -1)
-		for _, matches := range findResult {
-			switch string(matches[1]) {
-			case "$":
-				name := string(matches[2])
-				v, exists := env[name]
-				if !exists {
-					withWarn = true
-					log.Message(log.WARNING, `Undefined environment variable "%s" in line %d, using empty value`, name, *lineNumber)
-					v = []byte("")
-				}
-				line = bytes.Replace(line, matches[0], v, -1)
-			case "#":
-				s := string(matches[2])
-				if strings.HasPrefix(s, "include ") {
-					p := strings.Split(s, " ")
-					if len(p) != 2 {
-						msgs.Add(fmt.Sprintf(`Illegal preprocessor command "%s" in line %d`, string(matches[2]), *lineNumber))
-						continue
-					}
+		nIter := 0
 
-					var err error
-					repl, fn, err := readFile(p[1], base)
-					if err != nil {
-						msgs.Add(fmt.Sprintf(`Include error "%s" in line %d`, err.Error(), *lineNumber))
-						continue
-					}
+		for {
+			nIter++
+			if nIter > 32 {
+				msgs.Add(`Too many iterations for "%s"`, line)
+				break
+			}
 
-					*lineNumber--
-					b, w, err := populate(repl, filepath.Dir(fn), lineNumber)
-					if w {
+			findResult := rePreprocessor.FindAllSubmatch(line, -1)
+			if len(findResult) == 0 {
+				break
+			}
+
+			for _, matches := range findResult {
+				switch string(matches[1]) {
+				case "$":
+					name := string(matches[2])
+					v, exists := env[name]
+					if !exists {
 						withWarn = true
+						log.Message(log.WARNING, `Undefined environment variable "%s" in line %d, using empty value`, name, *lineNumber)
+						v = []byte("")
 					}
-					if err != nil {
-						msgs.Add(fmt.Sprintf(`Include error "%s" in line %d`, err.Error(), *lineNumber))
+					line = bytes.Replace(line, matches[0], v, -1)
+
+				case "#":
+					s := string(matches[2])
+					if strings.HasPrefix(s, "include ") {
+						b := new(bytes.Buffer)
+						p := strings.Split(s, " ")
+						if len(p) != 2 {
+							msgs.Add(fmt.Sprintf(`Illegal preprocessor command "%s" in line %d`, string(matches[2]), *lineNumber))
+						} else {
+							var err error
+							repl, fn, err := readFile(p[1], base)
+							if err != nil {
+								msgs.Add(fmt.Sprintf(`Include error "%s" in line %d`, err.Error(), *lineNumber))
+							} else {
+								*lineNumber--
+								w := false
+								b, w, err = populate(repl, filepath.Dir(fn), lineNumber)
+								if w {
+									withWarn = true
+								}
+								if err != nil {
+									msgs.Add(fmt.Sprintf(`Include error "%s" in line %d`, err.Error(), *lineNumber))
+								}
+							}
+						}
+						line = bytes.Replace(line, matches[0], bytes.TrimSpace(b.Bytes()), -1)
 						continue
 					}
 
-					line = bytes.Replace(line, matches[0], bytes.TrimSpace(b.Bytes()), -1)
-					continue
+					msgs.Add(fmt.Sprintf(`Unknown preprocessor command "%s" in line %d`, string(matches[2]), *lineNumber))
 				}
-
-				msgs.Add(fmt.Sprintf(`Unknown preprocessor command "%s" in line %d`, string(matches[2]), *lineNumber))
 			}
 		}
 
 		if len(line) != 0 {
 			newData.Write(bytes.TrimSpace(line))
 			newData.WriteByte(byte('\n'))
+
 		}
 	}
 
@@ -278,6 +294,19 @@ func GetSecuredText() string {
 //----------------------------------------------------------------------------------------------------------------------------//
 
 func loadEnv() {
+	env = map[string][]byte{
+		"___AppPID":      []byte(strconv.FormatInt(int64(syscall.Getpid()), 10)),
+		"___AppVersion":  []byte(misc.AppVersion()),
+		"___AppTags":     []byte(misc.AppTags()),
+		"___Copyright":   []byte(misc.Copyright()),
+		"___BuildTime":   []byte(misc.BuildTime()),
+		"___AppName":     []byte(misc.AppName()),
+		"___AppFullName": []byte(misc.AppFullName()),
+		"___AppExecPath": []byte(misc.AppExecPath()),
+		"___AppExecName": []byte(misc.AppExecName()),
+		"___AppWorkDir":  []byte(misc.AppWorkDir()),
+	}
+
 	osEnv := fEnv()
 	for _, s := range osEnv {
 		df := strings.SplitN(s, "=", 2)
