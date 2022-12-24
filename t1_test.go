@@ -2,6 +2,8 @@ package config
 
 import (
 	"bytes"
+	"encoding/json"
+	"fmt"
 	"testing"
 	"time"
 
@@ -215,6 +217,70 @@ user1 = "94af3fa5261b347f098bd9cf0fc1c145a20e1f662cb21b0d4a763398ac886f19017cb7d
 	if string(data) != string(expection) {
 		t.Fatalf("result:\n%q\nis not equal expection:\n%q", data, expection)
 	}
+}
+
+//----------------------------------------------------------------------------------------------------------------------------//
+
+func TestDurationJSON(t *testing.T) {
+	data := []struct {
+		s string
+		e string
+		v Duration
+	}{
+		{
+			s: "25",
+			e: "25s",
+			v: Duration(25 * time.Second),
+		},
+		{
+			s: "15s",
+			v: Duration(15 * time.Second),
+		},
+		{
+			s: "2d",
+			v: Duration(2 * time.Hour * 24),
+		},
+		{
+			s: "1d2h3m4s5ms6us7ns",
+			v: Duration(1*time.Hour*24 + 2*time.Hour + 3*time.Minute + 4*time.Second + 5*time.Millisecond + 6*time.Microsecond + 7*time.Nanosecond),
+		},
+	}
+
+	type ws struct {
+		D Duration
+	}
+
+	for i, d := range data {
+		w := ws{D: d.v}
+		e := d.e
+		if d.e == "" {
+			e = d.s
+		}
+		expected := fmt.Sprintf(`{"D":"%s"}`, e)
+
+		s, err := json.Marshal(w)
+		if err != nil {
+			t.Errorf("[%d] Marshal: %s", i, err)
+			continue
+		}
+		if string(s) != expected {
+			t.Errorf("[%d] got '%s', expected '%s'", i, s, expected)
+			continue
+		}
+
+		w.D = 0
+
+		err = json.Unmarshal(s, &w)
+		if err != nil {
+			t.Errorf("[%d] Unmarshal: %s", i, err)
+			continue
+		}
+		if w.D != d.v {
+			t.Errorf("[%d] got '%d', expected '%d'", i, w.D, d.v)
+			continue
+		}
+	}
+
 }
 
 //----------------------------------------------------------------------------------------------------------------------------//

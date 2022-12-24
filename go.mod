@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/alrusov/jsonw v0.1.3
 	github.com/alrusov/log v0.1.33
-	github.com/alrusov/misc v1.1.2
+	github.com/alrusov/misc v1.1.4
 	github.com/naoina/toml v0.1.1
 )
 
