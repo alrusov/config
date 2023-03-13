@@ -100,6 +100,8 @@ func populate(data []byte, base string, lineNumber *uint) (newData *bytes.Buffer
 			continue
 		}
 
+		line = bytes.ReplaceAll(line, []byte("\t"), []byte(" "))
+
 		*lineNumber++
 
 		nIter := 0
