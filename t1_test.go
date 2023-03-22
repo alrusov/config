@@ -31,18 +31,19 @@ type testJwtOptions struct {
 }
 
 type testCfg struct {
-	P0        string            `toml:"param-0"`
-	P1        string            `toml:"param-1"`
-	P2        int               `toml:"param-2"`
-	P3        string            `toml:"param-3"`
-	P4        int               `toml:"param-4"`
-	P5        misc.InterfaceMap `toml:"param-5"`
-	Duration1 Duration          `toml:"duration1"`
-	Duration2 Duration          `toml:"duration2"`
-	Duration3 Duration          `toml:"duration3"`
-	Duration4 Duration          `toml:"duration4"`
-	Plast     testS1            `toml:"param-last"`
-	HTTP      testHTTP          `toml:"http"`
+	P0           string            `toml:"param-0"`
+	P1           string            `toml:"param-1"`
+	P2           int               `toml:"param-2"`
+	P3           string            `toml:"param-3"`
+	P4           int               `toml:"param-4"`
+	P5           misc.InterfaceMap `toml:"param-5"`
+	Duration1    Duration          `toml:"duration1"`
+	Duration2    Duration          `toml:"duration2"`
+	Duration3    Duration          `toml:"duration3"`
+	Duration4    Duration          `toml:"duration4"`
+	Plast        testS1            `toml:"param-last"`
+	FromMacroses string            `toml:"from-macroses"`
+	HTTP         testHTTP          `toml:"http"`
 }
 
 func (options *testBasicOptions) Check(cfg any) (err error) {
@@ -81,6 +82,9 @@ func TestPopulate(t *testing.T) {
 			X: 1,
 			Y: "Y",
 		},
+
+		FromMacroses: "- 123456 - qwerty asdfgh -",
+
 		HTTP: testHTTP{
 			Listener: Listener{
 				Addr:                   ":1234",

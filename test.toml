@@ -21,6 +21,12 @@ param-last = { \
   "y" = "Y",   \
 }
 
+@M1 = 123456
+@M2 = qwerty\
+	asdfgh
+
+from-macroses = "- {@M1} - {@M2} -"
+
 [http]
 listener = { bind-addr = ":1234", ssl-combined-pem = "", timeout = "6s", \
 	root = "", \

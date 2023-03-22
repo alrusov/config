@@ -24,7 +24,7 @@ var (
 	fullConfig   = any(nil)
 	commonConfig = (*Common)(nil)
 
-	rePreprocessor = regexp.MustCompile(`(?:\{)([\$#])([^\}]+)(?:\})`)
+	rePreprocessor = regexp.MustCompile(`(?:\{)([\$#@])([^\}]+)(?:\})`)
 
 	// Use the # symbol at the begining of the line for comment
 	reComment = regexp.MustCompile(`(?m)^\s*#.*$`)
@@ -76,14 +76,14 @@ func readFile(name string, base string) ([]byte, string, error) {
 	return data, name, nil
 }
 
-//----------------------------------------------------------------------------------------------------------------------------//
+// ----------------------------------------------------------------------------------------------------------------------------//
 
-func populate(data []byte, base string, lineNumber *uint) (newData *bytes.Buffer, withWarn bool, err error) {
-	n := uint(0)
-	if lineNumber == nil {
-		lineNumber = &n
-	}
+type populate struct {
+	lineNumber uint
+	macroses   map[string][]byte
+}
 
+func (populate *populate) do(data []byte, base string) (newData *bytes.Buffer, withWarn bool, err error) {
 	newData = new(bytes.Buffer)
 	withWarn = false
 
@@ -100,16 +100,31 @@ func populate(data []byte, base string, lineNumber *uint) (newData *bytes.Buffer
 			continue
 		}
 
+		populate.lineNumber++
+
 		line = bytes.ReplaceAll(line, []byte("\t"), []byte(" "))
 
-		*lineNumber++
+		if line[0] == '@' {
+			m := bytes.SplitN(line, []byte("="), 2)
+			for i, s := range m {
+				m[i] = bytes.TrimSpace(s)
+			}
+
+			if len(m) < 2 || len(m[0]) == 1 {
+				msgs.Add(`Bad macros "%s" in line %d`, line, populate.lineNumber)
+				continue
+			}
+
+			populate.macroses[string(m[0][1:])] = m[1]
+			continue
+		}
 
 		nIter := 0
 
 		for {
 			nIter++
 			if nIter > 32 {
-				msgs.Add(`Too many iterations for "%s"`, line)
+				msgs.Add(`Too many iterations for "%s" in line %d`, line, populate.lineNumber)
 				break
 			}
 
@@ -125,7 +140,16 @@ func populate(data []byte, base string, lineNumber *uint) (newData *bytes.Buffer
 					v, exists := env[name]
 					if !exists {
 						withWarn = true
-						log.Message(log.WARNING, `Undefined environment variable "%s" in line %d, using empty value`, name, *lineNumber)
+						log.Message(log.WARNING, `Undefined environment variable "%s" in line %d, using empty value`, name, populate.lineNumber)
+						v = []byte("")
+					}
+					line = bytes.Replace(line, matches[0], v, -1)
+
+				case "@":
+					name := string(matches[2])
+					v, exists := populate.macroses[name]
+					if !exists {
+						msgs.Add(`Undefined macros "%s" in line %d`, name, populate.lineNumber)
 						v = []byte("")
 					}
 					line = bytes.Replace(line, matches[0], v, -1)
@@ -136,21 +160,21 @@ func populate(data []byte, base string, lineNumber *uint) (newData *bytes.Buffer
 						b := new(bytes.Buffer)
 						p := strings.Split(s, " ")
 						if len(p) != 2 {
-							msgs.Add(fmt.Sprintf(`Illegal preprocessor command "%s" in line %d`, string(matches[2]), *lineNumber))
+							msgs.Add(fmt.Sprintf(`Illegal preprocessor command "%s" in line %d`, string(matches[2]), populate.lineNumber))
 						} else {
 							var err error
 							repl, fn, err := readFile(p[1], base)
 							if err != nil {
-								msgs.Add(fmt.Sprintf(`Include error "%s" in line %d`, err.Error(), *lineNumber))
+								msgs.Add(fmt.Sprintf(`Include error "%s" in line %d`, err.Error(), populate.lineNumber))
 							} else {
-								*lineNumber--
+								populate.lineNumber--
 								w := false
-								b, w, err = populate(repl, filepath.Dir(fn), lineNumber)
+								b, w, err = populate.do(repl, filepath.Dir(fn))
 								if w {
 									withWarn = true
 								}
 								if err != nil {
-									msgs.Add(fmt.Sprintf(`Include error "%s" in line %d`, err.Error(), *lineNumber))
+									msgs.Add(fmt.Sprintf(`Include error "%s" in line %d`, err.Error(), populate.lineNumber))
 								}
 							}
 						}
@@ -158,7 +182,8 @@ func populate(data []byte, base string, lineNumber *uint) (newData *bytes.Buffer
 						continue
 					}
 
-					msgs.Add(fmt.Sprintf(`Unknown preprocessor command "%s" in line %d`, string(matches[2]), *lineNumber))
+					msgs.Add(fmt.Sprintf(`Unknown preprocessor command "%s" in line %d`, string(matches[2]), populate.lineNumber))
+					line = []byte{}
 				}
 			}
 		}
@@ -206,7 +231,12 @@ func LoadFile(fileName string, cfg any) (err error) {
 		}
 	}()
 
-	newData, withWarn, err = populate(data, filepath.Dir(fn), nil)
+	populate := &populate{
+		macroses:   make(map[string][]byte, 128),
+		lineNumber: 0,
+	}
+
+	newData, withWarn, err = populate.do(data, filepath.Dir(fn))
 	if err != nil {
 		return
 	}
