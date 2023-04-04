@@ -38,7 +38,7 @@ var (
 
 //----------------------------------------------------------------------------------------------------------------------------//
 
-func readFile(name string, base string) ([]byte, string, error) {
+func readFile(name string, base string, mandatory bool) ([]byte, string, error) {
 	name, err := misc.AbsPathEx(name, base)
 	if err != nil {
 		return nil, "", err
@@ -46,7 +46,12 @@ func readFile(name string, base string) ([]byte, string, error) {
 
 	f, err := os.Open(name)
 	if err != nil {
-		return nil, name, err
+		if mandatory {
+			return nil, name, err
+		}
+
+		log.Message(log.NOTICE, "Included file %s not found", name)
+		return nil, name, nil
 	}
 	defer f.Close()
 
@@ -156,14 +161,15 @@ func (populate *populate) do(data []byte, base string) (newData *bytes.Buffer, w
 
 				case "#":
 					s := string(matches[2])
-					if strings.HasPrefix(s, "include ") {
+					if strings.HasPrefix(s, "include ") || strings.HasPrefix(s, "#include ") {
+						mandatory := s[0] != '#'
 						b := new(bytes.Buffer)
-						p := strings.Split(s, " ")
+						p := strings.SplitN(s, " ", 2)
 						if len(p) != 2 {
 							msgs.Add(fmt.Sprintf(`Illegal preprocessor command "%s" in line %d`, string(matches[2]), populate.lineNumber))
 						} else {
 							var err error
-							repl, fn, err := readFile(p[1], base)
+							repl, fn, err := readFile(p[1], base, mandatory)
 							if err != nil {
 								msgs.Add(fmt.Sprintf(`Include error "%s" in line %d`, err.Error(), populate.lineNumber))
 							} else {
@@ -188,11 +194,8 @@ func (populate *populate) do(data []byte, base string) (newData *bytes.Buffer, w
 			}
 		}
 
-		if len(line) != 0 {
-			newData.Write(bytes.TrimSpace(line))
-			newData.WriteByte(byte('\n'))
-
-		}
+		newData.Write(bytes.TrimSpace(line))
+		newData.WriteByte(byte('\n'))
 	}
 
 	err = msgs.Error()
@@ -208,7 +211,7 @@ func LoadFile(fileName string, cfg any) (err error) {
 		loadEnv()
 	}
 
-	data, fn, err := readFile(fileName, misc.AppWorkDir())
+	data, fn, err := readFile(fileName, misc.AppWorkDir(), true)
 	if err != nil {
 		return
 	}
