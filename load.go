@@ -20,9 +20,10 @@ import (
 //----------------------------------------------------------------------------------------------------------------------------//
 
 var (
-	configText   = ""
-	fullConfig   = any(nil)
-	commonConfig = (*Common)(nil)
+	configText     = ""
+	fullConfig     = any(nil)
+	commonConfig   *Common
+	listenerConfig *Listener
 
 	rePreprocessor = regexp.MustCompile(`(?:\{)([\$#@])([^\}]+)(?:\})`)
 
@@ -254,22 +255,41 @@ func LoadFile(fileName string, cfg any) (err error) {
 
 	fullConfig = cfg
 
-	cp := reflect.ValueOf(cfg)
-	if cp.Kind() == reflect.Ptr {
-		c := cp.Elem()
-		if c.Kind() == reflect.Struct {
-			fCnt := c.NumField()
-			for i := 0; i < fCnt; i++ {
-				f, ok := c.Field(i).Addr().Interface().(*Common)
-				if ok {
-					SetCommon(f)
-					break
-				}
+	lookingForStdBlocks(cfg)
+
+	return
+}
+
+func lookingForStdBlocks(cfg any) {
+	c := reflect.ValueOf(cfg)
+
+	if c.Kind() == reflect.Ptr {
+		c = c.Elem()
+	}
+
+	if c.Kind() == reflect.Struct {
+		fCnt := c.NumField()
+
+		for i := 0; i < fCnt; i++ {
+			f := c.Field(i)
+			if f.Kind() == reflect.Ptr {
+				f = f.Elem()
+			}
+
+			if f.Kind() != reflect.Struct {
+				continue
+			}
+
+			switch f := f.Interface().(type) {
+			default:
+				lookingForStdBlocks(f)
+			case Common:
+				SetCommon(&f)
+			case Listener:
+				SetListener(&f)
 			}
 		}
 	}
-
-	return
 }
 
 //----------------------------------------------------------------------------------------------------------------------------//
@@ -293,6 +313,17 @@ func GetCommon() *Common {
 
 //----------------------------------------------------------------------------------------------------------------------------//
 
+// SetListener --
+func SetListener(cc *Listener) {
+	listenerConfig = cc
+}
+
+// GetCommon --
+func GetListener() *Listener {
+	return listenerConfig
+}
+
+// ----------------------------------------------------------------------------------------------------------------------------//
 var (
 	stdReplaces = map[string]string{
 		`(password\s*=\s*")(.*)(")`: `$1*$3`,
