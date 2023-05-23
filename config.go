@@ -121,8 +121,11 @@ const (
 	// ClientDefaultTimeout --
 	ClientDefaultTimeout = Duration(5 * time.Second)
 
-	// JWTdefaultLifetime --
-	JWTdefaultLifetime = Duration(3600 * time.Second)
+	// JWTdefaultLifetimeAccess --
+	JWTdefaultLifetimeAccess = Duration(time.Hour)
+
+	// JWTdefaultLifetimeRefresh --
+	JWTdefaultLifetimeRefresh = Duration(2 * 24 * time.Hour)
 )
 
 //----------------------------------------------------------------------------------------------------------------------------//
