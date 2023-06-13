@@ -67,6 +67,12 @@ func (x *Auth) Check(cfg any) (err error) {
 
 	x.Endpoints = authSlice2Map(x.EndpointsSlice)
 
+	x.LocalAdminGroupsMap = StringSlice2Map(x.LocalAdminGroups,
+		func(name string) string {
+			return name
+		},
+	)
+
 	x.Users = make(map[string]User, len(x.UsersMap))
 
 	for u, p := range x.UsersMap {
