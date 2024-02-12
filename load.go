@@ -2,7 +2,10 @@ package config
 
 import (
 	"bytes"
+	"embed"
 	"fmt"
+	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -39,40 +42,47 @@ var (
 
 //----------------------------------------------------------------------------------------------------------------------------//
 
+var embedFS *embed.FS
+
+func Embed(fs *embed.FS) {
+	embedFS = fs
+}
+
+//----------------------------------------------------------------------------------------------------------------------------//
+
 func readFile(name string, base string, mandatory bool) ([]byte, string, error) {
-	name, err := misc.AbsPathEx(name, base)
-	if err != nil {
-		return nil, "", err
+	var err error
+	f := fs.File(nil)
+
+	if embedFS != nil {
+		f, _ = embedFS.Open(name)
 	}
 
-	f, err := os.Open(name)
-	if err != nil {
-		if mandatory {
-			return nil, name, err
+	if f == nil {
+		// embedFS is nil or the embedded file was not found - let's try reading from the file system
+
+		name, err = misc.AbsPathEx(name, base)
+		if err != nil {
+			return nil, "", err
 		}
 
-		log.Message(log.NOTICE, "Included file %s not found", name)
-		return nil, name, nil
+		f, err = os.Open(name)
+
+		if err != nil {
+			if mandatory {
+				return nil, name, err
+			}
+
+			log.Message(log.NOTICE, "Included file %s not found", name)
+			return nil, name, nil
+		}
 	}
+
 	defer f.Close()
 
-	fi, err := f.Stat()
+	data, err := io.ReadAll(f)
 	if err != nil {
-		return nil, name, err
-	}
-
-	fSize := fi.Size()
-	if fSize == 0 {
 		return nil, name, nil
-	}
-
-	data := make([]byte, fSize)
-	dSize, err := f.Read(data)
-	if err != nil {
-		return nil, name, err
-	}
-	if int64(dSize) != fSize {
-		return nil, name, fmt.Errorf("file read error - got %d bytes, expected %d", dSize, fSize)
 	}
 
 	data = bytes.TrimSpace(reComment.ReplaceAll(data, []byte{}))

@@ -124,6 +124,7 @@ func TestPopulate(t *testing.T) {
 							Options: &testJwtOptions{Secret: "secret-secret", Lifetime: 157680000},
 						},
 					},
+					LocalAdminGroupsMap: misc.BoolMap{},
 				},
 			},
 		},
