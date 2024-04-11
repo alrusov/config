@@ -78,6 +78,8 @@ type (
 		UsersMap misc.StringMap  `toml:"users"`
 		Users    map[string]User `toml:"-"`
 
+		Realm string `toml:"realm"`
+
 		Methods             map[string]*AuthMethod `toml:"methods"`
 		LocalAdminGroups    []string               `toml:"local-auth-groups"`
 		LocalAdminGroupsMap misc.BoolMap           `toml:"-"`
