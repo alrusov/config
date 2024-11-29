@@ -28,7 +28,7 @@ var (
 	commonConfig   *Common
 	listenerConfig *Listener
 
-	rePreprocessor = regexp.MustCompile(`(?:\{)([\$#@])([^\}]+)(?:\})`)
+	rePreprocessor = regexp.MustCompile(`(\$\{|\{\$|\{#|\{@)([^\}]+)(?:\})`)
 
 	// Use the # symbol at the begining of the line for comment
 	reComment = regexp.MustCompile(`(?m)^\s*#.*$`)
@@ -151,7 +151,7 @@ func (populate *populate) do(data []byte, base string) (newData *bytes.Buffer, w
 
 			for _, matches := range findResult {
 				switch string(matches[1]) {
-				case "$":
+				case "${", "{$":
 					name := string(matches[2])
 					v, exists := env[name]
 					if !exists {
@@ -161,7 +161,7 @@ func (populate *populate) do(data []byte, base string) (newData *bytes.Buffer, w
 					}
 					line = bytes.Replace(line, matches[0], v, -1)
 
-				case "@":
+				case "{@":
 					name := string(matches[2])
 					v, exists := populate.macroses[name]
 					if !exists {
@@ -170,7 +170,7 @@ func (populate *populate) do(data []byte, base string) (newData *bytes.Buffer, w
 					}
 					line = bytes.Replace(line, matches[0], v, -1)
 
-				case "#":
+				case "{#":
 					s := string(matches[2])
 					if strings.HasPrefix(s, "include ") || strings.HasPrefix(s, "#include ") {
 						mandatory := s[0] != '#'
