@@ -1,6 +1,6 @@
 module github.com/alrusov/config
 
-go 1.23.3
+go 1.23.5
 
 require (
 	github.com/alrusov/jsonw v0.1.3

@@ -177,12 +177,12 @@ func (populate *populate) do(data []byte, base string) (newData *bytes.Buffer, w
 						b := new(bytes.Buffer)
 						p := strings.SplitN(s, " ", 2)
 						if len(p) != 2 {
-							msgs.Add(fmt.Sprintf(`Illegal preprocessor command "%s" in line %d`, string(matches[2]), populate.lineNumber))
+							msgs.Add(`Illegal preprocessor command "%s" in line %d`, string(matches[2]), populate.lineNumber)
 						} else {
 							var err error
 							repl, fn, err := readFile(p[1], base, mandatory)
 							if err != nil {
-								msgs.Add(fmt.Sprintf(`Include error "%s" in line %d`, err.Error(), populate.lineNumber))
+								msgs.Add(`Include error "%s" in line %d`, err.Error(), populate.lineNumber)
 							} else {
 								populate.lineNumber--
 								w := false
@@ -191,7 +191,7 @@ func (populate *populate) do(data []byte, base string) (newData *bytes.Buffer, w
 									withWarn = true
 								}
 								if err != nil {
-									msgs.Add(fmt.Sprintf(`Include error "%s" in line %d`, err.Error(), populate.lineNumber))
+									msgs.Add(`Include error "%s" in line %d`, err.Error(), populate.lineNumber)
 								}
 							}
 						}
@@ -199,7 +199,7 @@ func (populate *populate) do(data []byte, base string) (newData *bytes.Buffer, w
 						continue
 					}
 
-					msgs.Add(fmt.Sprintf(`Unknown preprocessor command "%s" in line %d`, string(matches[2]), populate.lineNumber))
+					msgs.Add(`Unknown preprocessor command "%s" in line %d`, string(matches[2]), populate.lineNumber)
 					line = []byte{}
 				}
 			}
