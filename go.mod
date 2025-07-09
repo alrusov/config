@@ -1,11 +1,11 @@
 module github.com/alrusov/config
 
-go 1.23.5
+go 1.24.4
 
 require (
 	github.com/alrusov/jsonw v0.1.3
 	github.com/alrusov/log v0.1.39
-	github.com/alrusov/misc v1.1.20
+	github.com/alrusov/misc v1.1.24
 	github.com/naoina/toml v0.1.1
 )
 

@@ -133,7 +133,7 @@ func TestPopulate(t *testing.T) {
 	var loaded testCfg
 	err := LoadFile("^test.toml", &loaded)
 	if err != nil {
-		t.Errorf(err.Error())
+		t.Errorf("%s", err.Error())
 		return
 	}
 
@@ -159,13 +159,13 @@ func TestPopulate(t *testing.T) {
 
 	jExpected, err := jsonw.Marshal(expected)
 	if err != nil {
-		t.Errorf(err.Error())
+		t.Errorf("%s", err.Error())
 		return
 	}
 
 	jLoaded, err := jsonw.Marshal(loaded)
 	if err != nil {
-		t.Errorf(err.Error())
+		t.Errorf("%s", err.Error())
 		return
 	}
 

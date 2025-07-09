@@ -278,15 +278,22 @@ func lookingForStdBlocks(cfg any) {
 	}
 
 	if c.Kind() == reflect.Struct {
+		ft := c.Type()
 		fCnt := c.NumField()
 
-		for i := 0; i < fCnt; i++ {
+		for i := range fCnt {
 			f := c.Field(i)
+
 			if f.Kind() == reflect.Ptr {
 				f = f.Elem()
 			}
 
 			if f.Kind() != reflect.Struct {
+				continue
+			}
+
+			t := ft.Field(i)
+			if !t.IsExported() {
 				continue
 			}
 
