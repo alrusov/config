@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"maps"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -36,8 +37,20 @@ var (
 	// Use the \ symbol at the end line to continue to next line
 	reMultiLine = regexp.MustCompile(`(?m)\s*\\\s*\r?\n\s*`)
 
-	fEnv = os.Environ
-	env  = map[string][]byte{}
+	fEnv   = os.Environ
+	env    = map[string][]byte{}
+	sysEnv = map[string][]byte{
+		"___AppPID":      []byte(strconv.FormatInt(int64(syscall.Getpid()), 10)),
+		"___AppVersion":  []byte(misc.AppVersion()),
+		"___AppTags":     []byte(misc.AppTags()),
+		"___Copyright":   []byte(misc.Copyright()),
+		"___BuildTime":   []byte(misc.BuildTime()),
+		"___AppName":     []byte(misc.AppName()),
+		"___AppFullName": []byte(misc.AppFullName()),
+		"___AppExecPath": []byte(misc.AppExecPath()),
+		"___AppExecName": []byte(misc.AppExecName()),
+		"___AppWorkDir":  []byte(misc.AppWorkDir()),
+	}
 )
 
 //----------------------------------------------------------------------------------------------------------------------------//
@@ -377,25 +390,21 @@ func GetSecuredText() string {
 //----------------------------------------------------------------------------------------------------------------------------//
 
 func loadEnv() {
-	env = map[string][]byte{
-		"___AppPID":      []byte(strconv.FormatInt(int64(syscall.Getpid()), 10)),
-		"___AppVersion":  []byte(misc.AppVersion()),
-		"___AppTags":     []byte(misc.AppTags()),
-		"___Copyright":   []byte(misc.Copyright()),
-		"___BuildTime":   []byte(misc.BuildTime()),
-		"___AppName":     []byte(misc.AppName()),
-		"___AppFullName": []byte(misc.AppFullName()),
-		"___AppExecPath": []byte(misc.AppExecPath()),
-		"___AppExecName": []byte(misc.AppExecName()),
-		"___AppWorkDir":  []byte(misc.AppWorkDir()),
-	}
-
 	osEnv := fEnv()
+	env = make(map[string][]byte, len(osEnv)+len(sysEnv))
+	maps.Copy(env, sysEnv)
+
 	for _, s := range osEnv {
 		df := strings.SplitN(s, "=", 2)
+		df[0] = strings.TrimSpace(df[0])
+
+		if _, exists := sysEnv[df[0]]; exists {
+			continue
+		}
+
 		v := ""
 		if len(df) > 1 {
-			v = df[1]
+			v = strings.TrimSpace(df[1])
 		}
 		env[df[0]] = []byte(v)
 	}
