@@ -50,7 +50,8 @@ type (
 	// Listener --
 	Listener struct {
 		// Addr should be set to the desired listening host:port
-		Addr string `toml:"bind-addr"`
+		Addr      string `toml:"bind-addr"`
+		DebugAddr string `toml:"debug-bind-addr"`
 
 		Root string `toml:"root"` // in filesystem
 

@@ -88,6 +88,7 @@ func TestPopulate(t *testing.T) {
 		HTTP: testHTTP{
 			Listener: Listener{
 				Addr:                   ":1234",
+				DebugAddr:              ":12345",
 				SSLCombinedPem:         "",
 				Timeout:                Duration(6 * time.Second),
 				Root:                   "",

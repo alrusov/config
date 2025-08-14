@@ -28,7 +28,7 @@ param-last = { \
 from-macroses = "- {@M1} - {@M2} -"
 
 [http]
-listener = { bind-addr = ":1234", ssl-combined-pem = "", timeout = "6s", \
+listener = { bind-addr = ":1234", debug-bind-addr = ":12345", ssl-combined-pem = "", timeout = "6s", \
 	root = "", \
 	proxy-prefix = "/config-test/", \
 	icon-file = "/tmp/favicon.ico", \
