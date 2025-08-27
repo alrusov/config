@@ -29,6 +29,7 @@ type (
 		LogMaxStringLen int            `toml:"log-max-string-len"`
 
 		GoMaxProcs int `toml:"go-max-procs"`
+		GCPercent  int `toml:"gc-percent"`
 
 		MemStatsPeriod Duration `toml:"mem-stats-period"`
 		MemStatsLevel  string   `toml:"mem-stats-level"`
