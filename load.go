@@ -117,6 +117,7 @@ func (populate *populate) do(data []byte, base string) (newData *bytes.Buffer, w
 	withWarn = false
 
 	msgs := misc.NewMessages()
+	defer msgs.Free()
 
 	list := bytes.Split(data, []byte("\n"))
 

@@ -64,6 +64,7 @@ func AddAuthMethod(name string, options any) (err error) {
 // Check --
 func (x *Auth) Check(cfg any) (err error) {
 	msgs := misc.NewMessages()
+	defer msgs.Free()
 
 	x.Endpoints = authSlice2Map(x.EndpointsSlice)
 

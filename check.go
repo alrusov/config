@@ -13,6 +13,7 @@ import (
 // Check --
 func (x *Common) Check(cfg any) (err error) {
 	msgs := misc.NewMessages()
+	defer msgs.Free()
 
 	if x.Name == "" {
 		x.Name = misc.AppName()
@@ -30,6 +31,7 @@ func (x *Common) Check(cfg any) (err error) {
 // Check --
 func (x *Listener) Check(cfg any) (err error) {
 	msgs := misc.NewMessages()
+	defer msgs.Free()
 
 	x.Addr = strings.TrimSpace(x.Addr)
 
@@ -88,6 +90,7 @@ func (x *Listener) Check(cfg any) (err error) {
 // Check --
 func (x *DB) Check(cfg any) (err error) {
 	msgs := misc.NewMessages()
+	defer msgs.Free()
 
 	return msgs.Error()
 }
@@ -97,6 +100,7 @@ func (x *DB) Check(cfg any) (err error) {
 // Check --
 func Check(cfg any, list []any) error {
 	msgs := misc.NewMessages()
+	defer msgs.Free()
 
 	for _, x := range list {
 		v := reflect.ValueOf(x)
