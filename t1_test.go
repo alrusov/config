@@ -290,3 +290,52 @@ func TestDurationJSON(t *testing.T) {
 }
 
 //----------------------------------------------------------------------------------------------------------------------------//
+
+func TestGetBlock(t *testing.T) {
+	type (
+		block1 struct{ P11, P12 int }
+		block2 struct{ P21, P22 string }
+		block3 struct {
+			P31 string
+			P32 int
+		}
+		config struct {
+			Block1 block1
+			Block2 *block2
+			Block3 block3
+		}
+	)
+
+	cfg := &config{
+		Block1: block1{11, 12},
+		Block2: &block2{"P21", "P22"},
+		Block3: block3{"P31", 32},
+	}
+
+	_, err := GetBlock[block1](cfg, "unknown")
+	if err == nil {
+		t.Errorf("expected error for unknown block")
+	}
+
+	_, err = GetBlock[block1](cfg, "Block2")
+	if err == nil {
+		t.Errorf("expected type mismatch error")
+	}
+
+	r1, err := GetBlock[block1](cfg, "Block1")
+	if err != nil || r1.P11 != 11 {
+		t.Errorf("block1 failed: %v", err)
+	}
+
+	r2, err := GetBlock[block2](cfg, "Block2")
+	if err != nil || r2.P21 != "P21" {
+		t.Errorf("block2 failed: %v", err)
+	}
+
+	r3, err := GetBlock[block3](cfg, "Block3")
+	if err != nil || r3.P32 != 32 {
+		t.Errorf("block3 failed: %v", err)
+	}
+}
+
+//----------------------------------------------------------------------------------------------------------------------------//

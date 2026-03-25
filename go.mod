@@ -1,16 +1,17 @@
 module github.com/alrusov/config
 
-go 1.25.5
+go 1.25.1
 
 require (
 	github.com/alrusov/jsonw v0.1.3
-	github.com/alrusov/log v0.1.39
-	github.com/alrusov/misc v1.1.28
+	github.com/alrusov/log v0.1.40
+	github.com/alrusov/misc v1.1.32
 	github.com/naoina/toml v0.1.1
 )
 
 require (
-	github.com/alrusov/panic v0.1.15 // indirect
+	github.com/alrusov/panic v0.1.16 // indirect
+	github.com/essentialkaos/translit v2.0.3+incompatible // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421 // indirect
