@@ -43,14 +43,14 @@ func ConvExtra(src *any, obj any) (err error) {
 
 	err = toml.NewEncoder(buf).Encode(*src)
 	if err != nil {
-		return fmt.Errorf(`encode error: %s`, err)
+		return fmt.Errorf(`encode error: %w`, err)
 	}
 
 	objTp := reflect.ValueOf(obj).Type()
 
 	err = toml.NewDecoder(buf).Decode(obj)
 	if err != nil {
-		return fmt.Errorf(`decode error: %s`, err)
+		return fmt.Errorf(`decode error: %w`, err)
 	}
 
 	newObjTp := reflect.ValueOf(obj).Type()

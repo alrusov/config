@@ -1,11 +1,11 @@
 module github.com/alrusov/config
 
-go 1.25.1
+go 1.26.1
 
 require (
 	github.com/alrusov/jsonw v0.1.3
 	github.com/alrusov/log v0.1.40
-	github.com/alrusov/misc v1.1.32
+	github.com/alrusov/misc v1.1.34
 	github.com/naoina/toml v0.1.1
 )
 
@@ -17,4 +17,5 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421 // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/naoina/go-stringutil v0.1.0 // indirect
+	golang.org/x/text v0.35.0 // indirect
 )
