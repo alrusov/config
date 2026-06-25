@@ -19,6 +19,14 @@ func (x *Common) Check(cfg any) (err error) {
 		x.Name = misc.AppName()
 	}
 
+	if x.Timezone == "" {
+		x.Timezone = "UTC"
+	}
+	_, err = time.LoadLocation(x.Timezone)
+	if err != nil {
+		msgs.AddError(err)
+	}
+
 	if x.LoadAvgPeriod <= 0 {
 		x.LoadAvgPeriod = Duration(60 * time.Second)
 	}
