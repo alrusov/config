@@ -20,6 +20,8 @@ type (
 		Description string `toml:"description"`
 		Class       string `toml:"class"`
 
+		Node string `toml:"node"`
+
 		Timezone string `toml:"timezone"`
 
 		LogLocalTime    bool           `toml:"log-local-time"`
