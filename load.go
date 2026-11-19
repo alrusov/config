@@ -141,7 +141,7 @@ func (populate *populate) do(data []byte, base string) (newData *bytes.Buffer, w
 			}
 
 			if len(m) < 2 || len(m[0]) == 1 {
-				msgs.Add(`Bad macros "%s" in line %d`, line, populate.lineNumber)
+				msgs.Add(`Bad macros "%s" in line %d`, replace.Do(string(line)), populate.lineNumber)
 				continue
 			}
 
@@ -154,7 +154,8 @@ func (populate *populate) do(data []byte, base string) (newData *bytes.Buffer, w
 		for {
 			nIter++
 			if nIter > 32 {
-				msgs.Add(`Too many iterations for "%s" in line %d`, line, populate.lineNumber)
+				// IDC: строка уже с частично подставленными переменными окружения -- через маскировщик
+				msgs.Add(`Too many iterations for "%s" in line %d`, replace.Do(string(line)), populate.lineNumber)
 				break
 			}
 
@@ -255,7 +256,9 @@ func LoadFile(fileName string, cfg any) (err error) {
 			}
 			msg.WriteString("<<<")
 
-			log.Message(log.WARNING, "%s", msg.String())
+			// IDC: текст уже после подстановки переменных окружения -- тот же маскировщик, что у GetSecuredText,
+			// иначе пароли и секреты уходят в лог открытым текстом при любом предупреждении загрузки
+			log.Message(log.WARNING, "%s", replace.Do(msg.String()))
 		}
 	}()
 
@@ -356,20 +359,78 @@ func GetListener() *Listener {
 
 // ----------------------------------------------------------------------------------------------------------------------------//
 var (
-	stdReplaces = map[string]string{
-		`(password\s*=\s*")(.*)(")`: `$1*$3`,
-		`(secret\s*=\s*")(.*)(")`:   `$1*$3`,
-		`(users\s*=\s*{)(.*)(})`:    `$1*$3`,
-	}
+	// IDC: маскировщик дампа конфига (GetSecuredText, WA-дамп LoadFile, сообщения populate).
+	//
+	// Все шаблоны компилируются с (?iU) (misc.Replace.Add): под U квантификатор ЛЕНИВЫЙ, поэтому
+	// значения берутся жадно явно -- (?-U:...), иначе маскируется один символ или до первой кавычки.
+	// Порядок детерминирован (срез, не map): правила применяются друг за другом по всему тексту.
+	//
+	// Ограничения (осознанно): ключи вне списка (pass, auth, bearer, *-credentials); значения
+	// в массивах (tokens = ["…"]) и числа без кавычек (secret = 98765432); сырой / в пароле URL
+	// (redis://u:Sl/ash@h -- граница пароля по /, как у net/url, пароль остаётся открытым);
+	// избыточная маска несекретных *key (sort-key) и имени пользователя URL без пароля
+	// (https://user@host), а также хвоста до @ в комментарии (url = "http://h:8080" # me@x.org) --
+	// только в дампе, загруженные значения не трогаются.
+	stdReplaces = append(keyReplaces(secretKey), [][2]string{
+		// однострочная inline-таблица пользователей -- до ПОСЛЕДНЕЙ } в строке
+		{`(users\s*=\s*{)((?-U:.*))(})`, `$1*$3`},
+
+		// пароль в DSN вида key=value без кавычек (libpq "password=...", ADO "Password=...;",
+		// "pwd=..."): ; в libpq -- обычный символ, \" -- кавычка ADO внутри TOML-строки;
+		// цена -- маска хвоста ADO-строки до пробела/кавычки
+		{`((?:password|passwd|pwd)\s*=\s*)((?-U:(?:[^\s"'\\]|\\.)+))`, `${1}*`},
+
+		// пароль в userinfo URL -- любой ключ (db-dsn, *-url): user без : и @ (может быть пустым),
+		// пароль -- жадно до ПОСЛЕДНЕГО @ перед путём (как net/url), включая ' " пробел @
+		{`(://(?-U:[^/@\s:]*):)((?-U:[^/\n]*))(@)`, `$1*$3`},
+
+		// userinfo БЕЗ двоеточия (https://<токен>@host -- токен в remote-URL): всё до последнего @
+		// перед хостом; user:pass сюда не попадает -- после правила выше там уже ":*@"
+		{`(://)((?-U:[^/\s:]+))(@)`, `$1*$3`},
+	}...)
 
 	replace = misc.NewReplace()
 )
 
+// secretKey -- имя ключа с секретом: *password, *passwd, *pwd, *secret, *token, *key, *salt
+// (в TOML -- и ключ в кавычках: "api-key" = ..., закрывающая кавычка -- в keyReplaces)
+const secretKey = `[\w.-]*(?:password|passwd|pwd|secret|token|key|salt)`
+
+// keyReplaces -- правила для значения ключа с секретом (key -- регулярное выражение имени ключа):
+//
+//   - TOML: значение во всех кавычках TOML -- ОДНИМ правилом: альтернатива в Go выбирается слева направо
+//     в одной позиции (тройные раньше одинарных), и уже замаскированное не проходится повторно; '…' по TOML
+//     без escape, в "…" \" -- часть значения. Тройные -- МНОГОСТРОЧНЫЕ: (?s) пропускает перевод строки
+//     (WA-дамп маскируется целиком, вместе с префиксами "%04d | " внутри значения); незакрытая тройная
+//     (сообщение populate по одной строке) -- маска до конца текста, иначе "…" взяла бы пустое "" и оставила хвост;
+//   - JSON: "key": "…" (тела HTTP-запросов в журнале); \" внутри значения -- часть значения;
+//   - query: ?key=… и &key=… (URI в журнале) -- до & пробела кавычки #.
+func keyReplaces(key string) [][2]string {
+	return [][2]string{
+		{`(` + key + `["']?\s*=\s*)(?-U:(""")(?s:.*?)(?:"""|\z)|(''')(?s:.*?)(?:'''|\z)|(")(?:[^"\\\n]|\\.)*"|(')[^'\n]*')`,
+			`${1}${2}${3}${4}${5}*${2}${3}${4}${5}`},
+		{`("` + key + `"\s*:\s*)(?-U:"(?:[^"\\]|\\.)*")`, `${1}"*"`},
+		{`([?&]` + key + `=)((?-U:[^&\s"'#]+))`, `${1}*`},
+	}
+}
+
+// AddSecretKey -- дополнительное имя ключа с секретом (регулярное выражение, например `communityName`):
+// его значения маскируются в TOML, JSON и query так же, как у ключей по умолчанию
+func AddSecretKey(key string) error {
+	for _, r := range keyReplaces(key) {
+		if err := replace.Add(r[0], r[1]); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func init() {
-	err := replace.AddMulti(stdReplaces)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "config.init: %s", err.Error())
-		os.Exit(misc.ExProgrammerError)
+	for _, r := range stdReplaces {
+		if err := replace.Add(r[0], r[1]); err != nil {
+			fmt.Fprintf(os.Stderr, "config.init: %s", err.Error())
+			os.Exit(misc.ExProgrammerError)
+		}
 	}
 }
 
@@ -386,6 +447,12 @@ func GetText() string {
 // GetSecuredText -- get prepared configuration text with securing
 func GetSecuredText() string {
 	return replace.Do(configText)
+}
+
+// SecureText -- замаскировать секреты в произвольном тексте теми же правилами, что GetSecuredText
+// (журналы: URI, заголовки, тела HTTP-запросов)
+func SecureText(s string) string {
+	return replace.Do(s)
 }
 
 //----------------------------------------------------------------------------------------------------------------------------//
