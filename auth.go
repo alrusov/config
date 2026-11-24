@@ -163,6 +163,10 @@ func authSlice2Map(src map[string][]string) (dst map[string]misc.BoolMap) {
 		mList := make(misc.BoolMap, len(list))
 		for _, u := range list {
 			u = strings.TrimSpace(u)
+			if u == "" {
+				// Пустой элемент (в том числе "" в конце списка) пропускаем: раньше u[0] ронял разбор
+				continue
+			}
 			v := u[0] != '!'
 			if !v {
 				u = strings.TrimSpace(u[1:])
