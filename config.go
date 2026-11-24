@@ -89,6 +89,10 @@ type (
 		Methods             map[string]*AuthMethod `toml:"methods"`
 		LocalAdminGroups    []string               `toml:"local-auth-groups"`
 		LocalAdminGroupsMap misc.BoolMap           `toml:"-"`
+
+		// Период обновления сведений о пользователях, ролях и правах у приложений, которые держат их в памяти.
+		// 0 - на усмотрение приложения
+		ReloadPeriod Duration `toml:"reload-period"`
 	}
 
 	// User --
